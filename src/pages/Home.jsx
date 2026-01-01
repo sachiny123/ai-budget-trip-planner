@@ -4,28 +4,64 @@ import { Link } from "react-router-dom";
 const images = [
   {
     src: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2",
-    title: "Goa"
+    title: "Goa",
   },
   {
     src: "https://images.unsplash.com/photo-1712388430474-ace0c16051e2",
-    title: "Manali"
+    title: "Manali",
   },
   {
     src: "https://plus.unsplash.com/premium_photo-1661963054563-ce928e477ff3",
-    title: "Jaipur"
+    title: "Jaipur",
   },
   {
     src: "https://images.unsplash.com/photo-1652460816777-a58bf8ed1f08",
-    title: "Kerala"
+    title: "Kerala",
   },
   {
     src: "https://images.unsplash.com/photo-1581793745862-99fde7fa73d2",
-    title: "Ladakh"
-  }
+    title: "Ladakh",
+  },
 ];
 
 export default function Home() {
   const [current, setCurrent] = useState(0);
+  const word = "India";
+const [typedText, setTypedText] = useState("");
+const [isDeleting, setIsDeleting] = useState(false);
+const [index, setIndex] = useState(0);
+
+useEffect(() => {
+  let timeout;
+
+  if (!isDeleting && index < word.length) {
+    // Typing
+    timeout = setTimeout(() => {
+      setTypedText(word.slice(0, index + 1));
+      setIndex(index + 1);
+    }, 150);
+  } 
+  else if (!isDeleting && index === word.length) {
+    // Pause after full word
+    timeout = setTimeout(() => {
+      setIsDeleting(true);
+    }, 5000); // ⏸️ 5 seconds pause
+  } 
+  else if (isDeleting && index > 0) {
+    // Deleting
+    timeout = setTimeout(() => {
+      setTypedText(word.slice(0, index - 1));
+      setIndex(index - 1);
+    }, 80);
+  } 
+  else if (isDeleting && index === 0) {
+    // Restart typing
+    setIsDeleting(false);
+  }
+
+  return () => clearTimeout(timeout);
+}, [index, isDeleting]);
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,10 +72,8 @@ export default function Home() {
 
   return (
     <div className="w-screen overflow-x-hidden bg-black">
-
       {/* ================= HERO ================= */}
       <section className="relative w-screen h-screen overflow-hidden">
-
         {/* Background */}
         <img
           src={images[current].src}
@@ -71,13 +105,20 @@ export default function Home() {
             </p>
 
             <h2 className="text-5xl md:text-6xl font-extrabold leading-tight">
-              Discover India <br />
-              <span className="text-indigo-400">without breaking your budget</span>
+              Discover{" "}
+              <span className="text-indigo-400">
+                {typedText}
+                <span className="animate-blink">|</span>
+              </span>
+              <br />
+              <span className="text-white/90">
+                without breaking your budget
+              </span>
             </h2>
 
             <p className="mt-6 text-lg text-gray-200">
-              Personalized itineraries, real cost breakdowns,
-              and instant planning powered by AI.
+              Personalized itineraries, real cost breakdowns, and instant
+              planning powered by AI.
             </p>
 
             <div className="mt-10 flex gap-4">
@@ -137,11 +178,8 @@ export default function Home() {
       {/* ================= FOOTER ================= */}
       <footer className="bg-gray-900 text-gray-300 py-12 px-8">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-
           <div>
-            <h4 className="text-xl font-bold text-white mb-2">
-              TripWise
-            </h4>
+            <h4 className="text-xl font-bold text-white mb-2">TripWise</h4>
             <p className="text-sm text-gray-400">
               Smart AI-powered trip planning for budget travelers in India.
             </p>
@@ -164,7 +202,6 @@ export default function Home() {
               <li>Privacy Policy</li>
             </ul>
           </div>
-
         </div>
 
         <p className="text-center text-xs text-gray-500 mt-10">
