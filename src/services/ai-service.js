@@ -12,7 +12,14 @@ export const generateTrip = async (destination, days, budget, tripType, travelSt
       console.log("Generating trip with Llama 3 (Groq) for:", destination);
 
       const prompt = `
-        Generate a detailed ${days}-day trip itinerary for ${destination}, India.
+        Generate a highly personalized ${days}-day trip itinerary for ${destination}, India.
+        
+        CRITICAL PERSONALIZATION RULES:
+        1. If Trip Type is "Solo": Focus on social hostels, solo-friendly cafes, safe solo activities, and hidden gems.
+        2. If Trip Type is "Couple": Focus on romantic views, intimate dining, sunset spots, and luxury/boutique experiences.
+        3. If Trip Type is "Family": Focus on kid-friendly attractions, spacious dining, safety, and easy accessibility.
+        4. If Trip Type is "Friends": Focus on nightlife, group adventure activities, trendy spots, and high-energy vibes.
+
         Trip Type: ${tripType}
         Travel Style: ${travelStyle}
         Total Budget: ₹${budget}
@@ -28,17 +35,17 @@ export const generateTrip = async (destination, days, budget, tripType, travelSt
           "itinerary": [
             {
               "day": 1,
-              "title": "Day Title",
+              "title": "Day Title (Personalized for ${tripType})",
               "daily_budget": "₹1500",
               "budget_breakdown": {
                  "transport": "₹300",
                  "food": "₹500",
                  "activities": "₹700"
               },
-              "plan": "Detailed plan for the day optimized for ${tripType} travelers.",
-              "must_visit": ["Place 1", "Place 2"],
-              "local_eats": ["Restaurant 1", "Dish 1"],
-              "activities": ["Activity 1"]
+              "plan": "Detailed description. MUST be optimized specifically for ${tripType} travelers.",
+              "must_visit": ["3-4 Places specifically for ${tripType}"],
+              "local_eats": ["2-3 Spots for ${tripType}"],
+              "activities": ["At least 2 activities related to ${tripType}"]
             }
           ]
         }
