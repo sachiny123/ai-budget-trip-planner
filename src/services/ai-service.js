@@ -24,15 +24,21 @@ export const generateTrip = async (destination, days, budget, tripType, travelSt
         {
           "destination": "${destination}",
           "duration": "${days} Days",
-          "budget": "₹${budget}",
+          "total_budget": "₹${budget}",
           "itinerary": [
             {
               "day": 1,
               "title": "Day Title",
-              "plans": { "${tripType}": "Detailed plan for the day..." },
-              "places": { "${tripType}": ["Place 1", "Place 2"] },
-              "food": { "${travelStyle}": ["Restaurant 1", "Dish 1"] },
-              "adventure": { "${tripType}": ["Activity 1"] }
+              "daily_budget": "₹1500",
+              "budget_breakdown": {
+                 "transport": "₹300",
+                 "food": "₹500",
+                 "activities": "₹700"
+              },
+              "plan": "Detailed plan for the day optimized for ${tripType} travelers.",
+              "must_visit": ["Place 1", "Place 2"],
+              "local_eats": ["Restaurant 1", "Dish 1"],
+              "activities": ["Activity 1"]
             }
           ]
         }
@@ -79,21 +85,20 @@ function generateMockTrip(destination, days, budget, tripType, travelStyle) {
     return { error: "Destination must be in India (Mock AI Restriction)." };
   }
 
+  const dailyBudget = Math.floor(budget / days);
   const mockItinerary = Array.from({ length: days }, (_, i) => ({
     day: i + 1,
     title: `Exploring ${destination} - Day ${i + 1}`,
-    plans: {
-      [tripType]: `Enjoy a wonderful day in ${destination} focusing on ${travelStyle} experiences suitable for ${tripType} travelers. Visit local landmarks and soak in the culture.`
+    daily_budget: `₹${dailyBudget}`,
+    budget_breakdown: {
+      transport: `₹${Math.floor(dailyBudget * 0.2)}`,
+      food: `₹${Math.floor(dailyBudget * 0.4)}`,
+      activities: `₹${Math.floor(dailyBudget * 0.4)}`
     },
-    places: {
-      [tripType]: [`${destination} City Center`, `${destination} Museum`, `${destination} Park`]
-    },
-    food: {
-      [travelStyle]: [`Local ${destination} Delicacy`, "Popular Cafe", "Street Food Stall"]
-    },
-    adventure: {
-      [tripType]: ["City Walk", "Photography Tour"]
-    }
+    plan: `Enjoy a wonderful day in ${destination} focusing on ${travelStyle} experiences suitable for ${tripType} travelers. Visit local landmarks and soak in the culture.`,
+    must_visit: [`${destination} City Center`, `${destination} Museum`, `${destination} Park`],
+    local_eats: [`Local ${destination} Delicacy`, "Popular Cafe", "Street Food Stall"],
+    activities: ["City Walk", "Photography Tour"]
   }));
 
   return {

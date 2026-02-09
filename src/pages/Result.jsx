@@ -98,8 +98,6 @@ export default function Result() {
                   key={day.day || index}
                   day={day}
                   index={index}
-                  tripType={tripType}
-                  travelStyle={travelStyle}
                 />
               ))}
             </div>
@@ -132,13 +130,14 @@ export default function Result() {
 
 /* ================= COMPONENT: DAY CARD ================= */
 
-function DayCard({ day, index, tripType, travelStyle }) {
+function DayCard({ day, index }) {
   const [isOpen, setIsOpen] = useState(true);
 
-  const plan = day.plans?.[tripType] || "Explore the city.";
-  const places = day.places?.[tripType] || [];
-  const food = day.food?.[travelStyle] || [];
-  const adventure = day.adventure?.[tripType] || [];
+  const plan = day.plan || "Explore the city.";
+  const mustVisit = day.must_visit || [];
+  const localEats = day.local_eats || [];
+  const activities = day.activities || [];
+  const breakdown = day.budget_breakdown || {};
 
   return (
     <motion.div
@@ -154,8 +153,13 @@ function DayCard({ day, index, tripType, travelStyle }) {
         onClick={() => setIsOpen(!isOpen)}
         className="cursor-pointer group mb-6"
       >
-        <div className="flex items-baseline gap-4 mb-2">
+        <div className="flex items-baseline justify-between mb-2">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">Day {day.day}</span>
+          {day.daily_budget && (
+            <span className="text-xs font-black text-black uppercase tracking-widest border border-black px-2 py-0.5 rounded">
+              Est. {day.daily_budget}
+            </span>
+          )}
         </div>
 
         <h3 className="text-4xl font-black text-black group-hover:text-gray-600 transition-colors uppercase tracking-tight">
@@ -170,14 +174,26 @@ function DayCard({ day, index, tripType, travelStyle }) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
           >
+            {/* Budget Breakdown Pill */}
+            {Object.keys(breakdown).length > 0 && (
+              <div className="flex flex-wrap gap-4 mb-8">
+                {Object.entries(breakdown).map(([key, val]) => (
+                  <div key={key} className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-100 flex flex-col">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{key}</span>
+                    <span className="text-sm font-black text-black uppercase">{val}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <p className="text-lg text-gray-600 font-serif leading-relaxed mb-10 max-w-3xl border-l-2 border-gray-100 pl-6 italic">
               "{plan}"
             </p>
 
             <div className="grid md:grid-cols-3 gap-12 mb-16">
-              <InfoSection title="Must Visit" items={places} />
-              <InfoSection title="Local Eats" items={food} />
-              <InfoSection title="Experience" items={adventure} />
+              <InfoSection title="Must Visit" items={mustVisit} />
+              <InfoSection title="Local Eats" items={localEats} />
+              <InfoSection title="Experience" items={activities} />
             </div>
           </motion.div>
         )}
