@@ -32,8 +32,9 @@ export default function Login() {
             setLoading(true);
             await loginWithGoogle();
             navigate("/plan");
-        } catch {
-            setError("Failed to log in with Google");
+        } catch (err) {
+            console.error("Google Login Error:", err);
+            setError(err.message || "Failed to log in with Google");
         }
         setLoading(false);
     }
