@@ -58,6 +58,12 @@ export default function Result() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+
+      // Add "TripWise" branding to the bottom corner
+      pdf.setFontSize(10);
+      pdf.setTextColor(150); // Light gray
+      pdf.text("TripWise", pdfWidth - 25, pdfHeight > 280 ? 290 : pdfHeight + 10);
+
       pdf.save(`TripWise_${destination.replace(/\s+/g, '_')}.pdf`);
 
       console.log("PDF saved successfully.");
