@@ -89,7 +89,7 @@ export default function Result() {
       {/* CAPTURE WRAPPER */}
       <div ref={itineraryRef} className="bg-white pdf-capture">
         {/* HERO SECTION */}
-        <div className="relative h-[60vh] w-full overflow-hidden print:h-[40vh]">
+        <div className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden print:h-[40vh]">
           <img
             src={`https://loremflickr.com/1920/1080/${destination},landscape/all`}
             alt={destination}
@@ -98,16 +98,16 @@ export default function Result() {
           />
           <div className="absolute inset-0 bg-black/60" />
 
-          <div className="absolute inset-0 flex items-center justify-center text-center p-4">
+          <div className="absolute inset-0 flex items-center justify-center text-center p-6">
             <div className="max-w-5xl">
-              <span className="inline-block px-3 py-1 border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-[0.2em] mb-6">
+              <span className="inline-block px-3 py-1 border border-white/30 rounded-full text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-4 md:mb-6">
                 TripWise Itinerary
               </span>
-              <h1 className="text-6xl md:text-9xl font-black text-white mb-8 uppercase tracking-tighter">
+              <h1 className="text-4xl md:text-9xl font-black text-white mb-6 md:mb-8 uppercase tracking-tighter">
                 {destination}
               </h1>
 
-              <div className="inline-flex flex-wrap items-center justify-center gap-8 text-white font-bold tracking-widest uppercase text-xs">
+              <div className="inline-flex flex-wrap items-center justify-center gap-4 md:gap-8 text-white font-bold tracking-widest uppercase text-[10px] md:text-xs">
                 <span className="border-b border-transparent pb-1">
                   {days} Days
                 </span>
@@ -123,7 +123,7 @@ export default function Result() {
         </div>
 
         {/* ITINERARY CONTENT */}
-        <div className="max-w-5xl mx-auto px-6 py-24 w-full">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-24 w-full">
 
           {itineraryData.length > 0 ? (
             <div className="space-y-12 border-l border-black ml-4 md:ml-0 pl-8 md:pl-12">

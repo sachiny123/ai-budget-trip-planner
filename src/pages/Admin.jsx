@@ -57,13 +57,13 @@ export default function Admin() {
     if (!isAdmin) return <Navigate to="/" />;
 
     return (
-        <div className="min-h-screen bg-white text-black p-8 md:p-16">
+        <div className="min-h-screen bg-white text-black p-6 md:p-16">
             <div className="max-w-7xl mx-auto">
-                <header className="mb-16">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 block">
+                <header className="mb-12 md:mb-16">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 md:mb-4 block">
                         System Administration
                     </span>
-                    <h1 className="text-6xl font-black uppercase tracking-tighter">Platform Overview</h1>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Platform Overview</h1>
                 </header>
 
                 {loading ? (
@@ -71,16 +71,16 @@ export default function Admin() {
                         Loading System Data...
                     </div>
                 ) : (
-                    <div className="space-y-16">
+                    <div className="space-y-12 md:space-y-16">
                         {/* STATS CARDS */}
-                        <div className="grid md:grid-cols-2 gap-8 text-white">
-                            <div className="bg-black p-12 rounded-[3rem] flex flex-col justify-between h-64">
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Total Creators</span>
-                                <span className="text-8xl font-black tracking-tighter">{stats.totalUsers}</span>
+                        <div className="grid md:grid-cols-2 gap-6 md:gap-8 text-white">
+                            <div className="bg-black p-10 md:p-12 rounded-[2rem] md:rounded-[3rem] flex flex-col justify-between h-56 md:h-64">
+                                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/50">Total Creators</span>
+                                <span className="text-6xl md:text-8xl font-black tracking-tighter">{stats.totalUsers}</span>
                             </div>
-                            <div className="bg-black p-12 rounded-[3rem] flex flex-col justify-between h-64 border border-black">
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Itineraries Generated</span>
-                                <span className="text-8xl font-black tracking-tighter">{stats.totalTrips}</span>
+                            <div className="bg-black p-10 md:p-12 rounded-[2rem] md:rounded-[3rem] flex flex-col justify-between h-56 md:h-64 border border-black">
+                                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/50">Itineraries Generated</span>
+                                <span className="text-6xl md:text-8xl font-black tracking-tighter">{stats.totalTrips}</span>
                             </div>
                         </div>
 

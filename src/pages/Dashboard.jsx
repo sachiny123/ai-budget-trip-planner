@@ -60,14 +60,14 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-black p-8 md:p-16">
+        <div className="min-h-screen bg-white text-black p-6 md:p-16">
             <div className="max-w-7xl mx-auto">
-                <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <header className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 block">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 md:mb-4 block">
                             User Dashboard
                         </span>
-                        <h1 className="text-6xl font-black uppercase tracking-tighter">My Journeys</h1>
+                        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">My Journeys</h1>
                     </div>
                     <Link
                         to="/plan"

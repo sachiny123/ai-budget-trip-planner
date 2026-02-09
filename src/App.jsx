@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Planner from "./pages/Planner";
 import Result from "./pages/Result";
@@ -9,10 +9,61 @@ import Admin from "./pages/Admin";
 import Pricing from "./pages/Pricing";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
   return currentUser ? children : <Navigate to="/login" />;
+}
+
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, x: 10 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -10 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+  >
+    {children}
+  </motion.div>
+);
+
+function AppRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
+        <Route
+          path="/plan"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Planner /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Dashboard /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Admin /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/pricing" element={<PageWrapper><Pricing /></PageWrapper>} />
+        <Route path="/result" element={<PageWrapper><Result /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
+  );
 }
 
 export default function App() {
@@ -20,38 +71,8 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Navbar />
-        <div className="pt-16"> {/* Add padding for fixed navbar */}
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/plan"
-              element={
-                <ProtectedRoute>
-                  <Planner />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/result" element={<Result />} />
-          </Routes>
+        <div className="pt-16">
+          <AppRoutes />
         </div>
       </BrowserRouter>
     </AuthProvider>

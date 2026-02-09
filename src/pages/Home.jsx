@@ -37,22 +37,8 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen bg-white text-black font-sans overflow-x-hidden">
-      {/* ================= NAV ================= */}
-      <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-6 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <h1 className="text-2xl font-black tracking-tighter uppercase">
-          TripWise<span className="text-gray-400">.AI</span>
-        </h1>
-
-        <Link
-          to="/plan"
-          className="px-6 py-2 rounded-full bg-black text-white font-bold text-sm uppercase tracking-wider hover:bg-gray-800 transition"
-        >
-          Start Planning
-        </Link>
-      </nav>
-
       {/* ================= HERO ================= */}
-      <header className="relative w-full min-h-screen pt-32 pb-20 px-6 md:px-12 flex flex-col justify-center">
+      <header className="relative w-full min-h-screen pt-12 pb-20 px-6 md:px-12 flex flex-col justify-center">
 
         <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center">
 
@@ -63,31 +49,31 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="space-y-8 z-10"
           >
-            <div className="inline-block px-3 py-1 border border-black rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="inline-block px-3 py-1 border border-black rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest">
               AI-Powered Travel Planner
             </div>
 
-            <h2 className="text-6xl md:text-8xl font-black leading-tight tracking-tighter">
+            <h2 className="text-5xl md:text-8xl font-black leading-tight tracking-tighter uppercase">
               DISCOVER <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-gray-500">
                 INDIA.
               </span>
             </h2>
 
-            <p className="text-xl text-gray-600 max-w-md leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 max-w-md leading-relaxed">
               Experience the future of travel. Smart itineraries, real-time budgeting, and hidden gems—all curated by AI in seconds.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link
                 to="/plan"
-                className="px-8 py-4 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 transition-transform uppercase tracking-wide"
+                className="w-full sm:w-auto px-10 py-5 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-wide"
               >
                 Plan My Trip
               </Link>
               <Link
                 to="/login"
-                className="px-8 py-4 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 transition-colors uppercase tracking-wide"
+                className="w-full sm:w-auto px-10 py-5 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 active:scale-95 transition-all text-center uppercase tracking-wide"
               >
                 Log In
               </Link>

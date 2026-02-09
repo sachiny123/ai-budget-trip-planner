@@ -104,9 +104,9 @@ export default function Planner() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-6 md:p-12">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4 md:p-12">
 
-      <div className="w-full max-w-6xl bg-white rounded-[2rem] shadow-xl overflow-hidden grid md:grid-cols-2">
+      <div className="w-full max-w-6xl bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl overflow-hidden grid md:grid-cols-2">
 
         {/* LEFT INFO - Minimal & Cinematic */}
         <div className="hidden md:flex flex-col justify-between bg-black text-white p-12 relative overflow-hidden">
@@ -136,13 +136,13 @@ export default function Planner() {
         </div>
 
         {/* FORM */}
-        <div className="p-10 md:p-16 flex flex-col justify-center">
-          <div className="mb-10 flex items-end justify-between">
+        <div className="p-8 md:p-16 flex flex-col justify-center">
+          <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-black text-black uppercase tracking-tight mb-2">
+              <h2 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tight mb-1 md:mb-2">
                 Trip Details
               </h2>
-              <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">
+              <p className="text-gray-500 text-[10px] md:text-sm font-medium uppercase tracking-widest">
                 Let's get the basics down
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function Planner() {
               onChange={handleChange}
             />
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Input
                 label="Days"
                 type="number"
@@ -187,7 +187,7 @@ export default function Planner() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Select
                 label="Who's going?"
                 name="tripType"
@@ -216,7 +216,7 @@ export default function Planner() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-5 rounded-full font-bold text-sm uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 ${loading
+              className={`w-full py-5 rounded-full font-bold text-sm uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 active:scale-95 ${loading
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-black text-white hover:bg-gray-900"
                 }`}

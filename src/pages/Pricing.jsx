@@ -57,13 +57,13 @@ export default function Pricing() {
     ];
 
     return (
-        <div className="min-h-screen bg-white text-black p-8 md:p-16">
+        <div className="min-h-screen bg-white text-black p-6 md:p-16">
             <div className="max-w-7xl mx-auto">
-                <header className="text-center mb-24">
+                <header className="text-center mb-16 md:mb-24">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4 block">
                         Monetization
                     </span>
-                    <h1 className="text-7xl font-black uppercase tracking-tighter mb-6">Refill Credits</h1>
+                    <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-6">Refill Credits</h1>
                     <p className="text-gray-500 font-medium uppercase tracking-widest text-xs">
                         Current Balance: <span className="text-black">{userData?.credits ?? 0} Coins</span>
                     </p>
