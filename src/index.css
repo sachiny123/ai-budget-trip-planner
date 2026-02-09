@@ -120,3 +120,58 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* PDF COMPATIBILITY FIX: html2canvas vs Tailwind v4 oklab/oklch */
+.pdf-capture,
+.pdf-capture * {
+  --tw-bg-opacity: 1 !important;
+  --tw-text-opacity: 1 !important;
+}
+
+.pdf-capture .bg-white {
+  background-color: #ffffff !important;
+}
+
+.pdf-capture .text-black {
+  color: #000000 !important;
+}
+
+.pdf-capture .text-white {
+  color: #ffffff !important;
+}
+
+.pdf-capture .bg-black {
+  background-color: #000000 !important;
+}
+
+.pdf-capture .bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.pdf-capture .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.pdf-capture .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.pdf-capture .text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.pdf-capture .border-black {
+  border-color: #000000 !important;
+}
+
+.pdf-capture .border-gray-100 {
+  border-color: #f3f4f6 !important;
+}
+
+.pdf-capture .border-white\/30 {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.pdf-capture .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}

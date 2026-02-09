@@ -74,7 +74,7 @@ export default function Result() {
   return (
     <div className="min-h-screen bg-white text-black w-full font-sans">
       {/* CAPTURE WRAPPER */}
-      <div ref={itineraryRef} className="bg-white">
+      <div ref={itineraryRef} className="bg-white pdf-capture">
         {/* HERO SECTION */}
         <div className="relative h-[60vh] w-full overflow-hidden print:h-[40vh]">
           <img
