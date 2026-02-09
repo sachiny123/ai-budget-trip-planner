@@ -67,6 +67,9 @@ export const AuthProvider = ({ children }) => {
                         setUserData(docSnap.data());
                     }
                     setLoading(false);
+                }, (err) => {
+                    console.error("Firestore data blocked or failed:", err);
+                    setLoading(false);
                 });
                 return () => unsubProfile();
             } else {
