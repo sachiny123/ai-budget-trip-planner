@@ -57,11 +57,22 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
-                // Sync user data from Firestore
+                // Ensure doc exists (for legacy users)
                 const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        email: user.email,
+                        credits: 3,
+                        createdAt: new Date().toISOString(),
+                        isPro: false
+                    });
+                }
+
+                // Sync user data from Firestore
                 const unsubProfile = onSnapshot(userRef, (docSnap) => {
                     if (docSnap.exists()) {
                         setUserData(docSnap.data());

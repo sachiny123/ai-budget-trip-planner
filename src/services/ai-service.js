@@ -31,21 +31,21 @@ export const generateTrip = async (destination, days, budget, tripType, travelSt
         {
           "destination": "${destination}",
           "duration": "${days} Days",
-          "total_budget": "₹${budget}",
+          "totalBudget": "₹${budget}",
           "itinerary": [
             {
               "day": 1,
-              "title": "Day Title (Personalized for ${tripType})",
+              "title": "Day Title",
               "daily_budget": "₹1500",
               "budget_breakdown": {
                  "transport": "₹300",
                  "food": "₹500",
                  "activities": "₹700"
               },
-              "plan": "Detailed description. MUST be optimized specifically for ${tripType} travelers.",
-              "must_visit": ["3-4 Places specifically for ${tripType}"],
-              "local_eats": ["2-3 Spots for ${tripType}"],
-              "activities": ["At least 2 activities related to ${tripType}"]
+              "plan": "Detailed description.",
+              "must_visit": ["Place 1"],
+              "local_eats": ["Eat 1"],
+              "activities": ["Activity 1"]
             }
           ]
         }
@@ -111,7 +111,7 @@ function generateMockTrip(destination, days, budget, tripType, travelStyle) {
   return {
     destination: destination,
     duration: `${days} Days`,
-    budget: `₹${budget}`,
+    totalBudget: `₹${budget}`,
     itinerary: mockItinerary
   };
 }

@@ -12,12 +12,19 @@ export default function Result() {
   const {
     destination,
     days,
-    totalBudget,
+    totalBudget: rawTotalBudget,
+    total_budget: rawTotalBudgetAlt,
+    budget: rawBudget,
     tripType = "solo",
     travelStyle = "budget",
-    itinerary = [],
+    itinerary: rawItinerary = [],
+    plan: rawPlan,
     source = "Unknown"
   } = location.state || {};
+
+  // Standardize Data for display
+  const totalBudgetLabel = rawTotalBudget || rawTotalBudgetAlt || (rawBudget ? `₹${rawBudget}` : "N/A");
+  const itineraryData = rawItinerary.length > 0 ? rawItinerary : (rawPlan || []);
 
   // Redirect if no state
   useEffect(() => {
@@ -105,7 +112,7 @@ export default function Result() {
                   {days} Days
                 </span>
                 <span className="border-b border-transparent pb-1">
-                  ₹{totalBudget}
+                  {totalBudgetLabel}
                 </span>
                 <span className="border-b border-transparent pb-1">
                   {source}
@@ -118,9 +125,9 @@ export default function Result() {
         {/* ITINERARY CONTENT */}
         <div className="max-w-5xl mx-auto px-6 py-24 w-full">
 
-          {itinerary.length > 0 ? (
+          {itineraryData.length > 0 ? (
             <div className="space-y-12 border-l border-black ml-4 md:ml-0 pl-8 md:pl-12">
-              {itinerary.map((day, index) => (
+              {itineraryData.map((day, index) => (
                 <DayCard
                   key={day.day || index}
                   day={day}

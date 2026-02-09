@@ -20,19 +20,27 @@ export default function Dashboard() {
     const fetchTrips = async () => {
         try {
             setLoading(true);
+            // Simple query to avoid composite index requirement
             const q = query(
                 collection(db, "trips"),
-                where("userId", "==", currentUser.uid),
-                orderBy("createdAt", "desc")
+                where("userId", "==", currentUser.uid)
             );
             const querySnapshot = await getDocs(q);
             const tripsData = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            // Sort in-memory instead of Firestore for now
+            tripsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
             setTrips(tripsData);
         } catch (err) {
             console.error("Error fetching trips:", err);
+            // Fallback for user if index is really the issue
+            if (err.message.includes("index")) {
+                alert("Firestore Index needed. Check console for the link to enable sorting.");
+            }
         } finally {
             setLoading(false);
         }
