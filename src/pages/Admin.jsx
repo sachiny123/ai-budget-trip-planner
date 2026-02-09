@@ -74,13 +74,13 @@ export default function Admin() {
                     <div className="space-y-12 md:space-y-16">
                         {/* STATS CARDS */}
                         <div className="grid md:grid-cols-2 gap-6 md:gap-8 text-white">
-                            <div className="bg-black p-10 md:p-12 rounded-[2rem] md:rounded-[3rem] flex flex-col justify-between h-56 md:h-64">
-                                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/50">Total Creators</span>
-                                <span className="text-6xl md:text-8xl font-black tracking-tighter">{stats.totalUsers}</span>
+                            <div className="bg-black text-white p-12 rounded-[3rem] flex flex-col justify-between h-64">
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Total Creators</span>
+                                <span className="text-8xl font-black tracking-tighter">{stats.totalUsers}</span>
                             </div>
-                            <div className="bg-black p-10 md:p-12 rounded-[2rem] md:rounded-[3rem] flex flex-col justify-between h-56 md:h-64 border border-black">
-                                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/50">Itineraries Generated</span>
-                                <span className="text-6xl md:text-8xl font-black tracking-tighter">{stats.totalTrips}</span>
+                            <div className="bg-black text-white p-12 rounded-[3rem] flex flex-col justify-between h-64 border border-black">
+                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Itineraries Generated</span>
+                                <span className="text-8xl font-black tracking-tighter">{stats.totalTrips}</span>
                             </div>
                         </div>
 
