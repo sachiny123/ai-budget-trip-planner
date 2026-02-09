@@ -25,28 +25,49 @@ export default function Result() {
   }, [destination, navigate]);
 
   const handleDownloadPDF = async () => {
-    if (!itineraryRef.current) return;
+    if (!itineraryRef.current) {
+      console.error("No itinerary element found to download.");
+      return;
+    }
 
-    // Minimal feedback
     const btn = document.getElementById("download-btn");
-    if (btn) btn.innerText = "Saving...";
+    try {
+      if (btn) btn.innerText = "Processing...";
+      console.log("Starting PDF generation for:", destination);
 
-    const element = itineraryRef.current;
+      // Fix: Scroll to top prevents html2canvas from capturing empty space
+      window.scrollTo(0, 0);
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-    });
+      const element = itineraryRef.current;
 
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Wait a tiny bit for any animations to settle
+      await new Promise(r => setTimeout(r, 500));
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`TripWise_${destination}.pdf`);
+      const canvas = await html2canvas(element, {
+        scale: 1.5, // Reduced from 2 for better stability
+        useCORS: true,
+        logging: true, // Enable html2canvas internal logs
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+      });
 
-    if (btn) btn.innerText = "Download PDF";
+      console.log("Canvas generated:", canvas.width, "x", canvas.height);
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.8); // JPEG is smaller and faster than PNG
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`TripWise_${destination.replace(/\s+/g, '_')}.pdf`);
+
+      console.log("PDF saved successfully.");
+    } catch (err) {
+      console.error("PDF Generation Failed:", err);
+      alert("Something went wrong while saving the PDF. Please try again or take a screenshot.");
+    } finally {
+      if (btn) btn.innerText = "Download PDF";
+    }
   };
 
   if (!destination) return null;
