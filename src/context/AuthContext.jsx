@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, googleProvider } from "../firebase";
+import { auth, db, googleProvider } from "../firebase";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -7,6 +7,7 @@ import {
     signOut,
     onAuthStateChanged
 } from "firebase/auth";
+import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -14,18 +15,41 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
+    const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const signup = (email, password) => {
-        return createUserWithEmailAndPassword(auth, email, password);
+    const signup = async (email, password) => {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", result.user.uid), {
+            email: result.user.email,
+            credits: 3,
+            createdAt: new Date().toISOString(),
+            isPro: false
+        });
+        return result;
     };
 
     const login = (email, password) => {
         return signInWithEmailAndPassword(auth, email, password);
     };
 
-    const loginWithGoogle = () => {
-        return signInWithPopup(auth, googleProvider);
+    const loginWithGoogle = async () => {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+
+        // Ensure user doc exists with credits if first time
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            await setDoc(userRef, {
+                email: user.email,
+                credits: 3,
+                createdAt: new Date().toISOString(),
+                isPro: false
+            });
+        }
+        return result;
     };
 
     const logout = () => {
@@ -35,7 +59,20 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
-            setLoading(false);
+            if (user) {
+                // Sync user data from Firestore
+                const userRef = doc(db, "users", user.uid);
+                const unsubProfile = onSnapshot(userRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        setUserData(docSnap.data());
+                    }
+                    setLoading(false);
+                });
+                return () => unsubProfile();
+            } else {
+                setUserData(null);
+                setLoading(false);
+            }
         });
 
         return unsubscribe;
@@ -43,6 +80,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         currentUser,
+        userData,
         signup,
         login,
         loginWithGoogle,

@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateTrip } from "../services/ai-service";
+import { db } from "../firebase";
+import {
+  doc,
+  updateDoc,
+  increment,
+  collection,
+  addDoc
+} from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
 
 export default function Planner() {
   const navigate = useNavigate();
@@ -21,6 +30,8 @@ export default function Planner() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const { currentUser, userData } = useAuth();
+
   /* REPLACE THIS WITH: */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +47,11 @@ export default function Planner() {
 
     if (Number(formData.budget) < 1000) {
       return setError("Budget seems too low for a trip.");
+    }
+
+    // CREDIT CHECK
+    if (!userData || userData.credits < 1) {
+      return setError("You have no credits left. Please upgrade or refill.");
     }
 
     try {
@@ -55,19 +71,28 @@ export default function Planner() {
         return;
       }
 
-      // Save to Firestore (Optional for now, but good practice)
-      /* 
-      const docRef = await addDoc(collection(db, "trips"), {
+      // 1. Deduct Credit
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, {
+        credits: increment(-1)
+      });
+
+      // 2. Save Trip to Firestore
+      const tripRef = await addDoc(collection(db, "trips"), {
         userId: currentUser.uid,
         ...trip,
-        createdAt: new Date()
+        createdAt: new Date().toISOString(),
+        tripType: formData.tripType,
+        travelStyle: formData.travelStyle,
+        budget: formData.budget,
+        days: formData.days
       });
-      */
 
       navigate("/result", {
         state: {
           ...formData, // pass input data
-          ...trip // pass generated trip data (overwrites defaults)
+          ...trip, // pass generated trip data (overwrites defaults)
+          tripId: tripRef.id
         },
       });
     } catch (err) {
@@ -112,13 +137,19 @@ export default function Planner() {
 
         {/* FORM */}
         <div className="p-10 md:p-16 flex flex-col justify-center">
-          <div className="mb-10">
-            <h2 className="text-3xl font-black text-black uppercase tracking-tight mb-2">
-              Trip Details
-            </h2>
-            <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">
-              Let's get the basics down
-            </p>
+          <div className="mb-10 flex items-end justify-between">
+            <div>
+              <h2 className="text-3xl font-black text-black uppercase tracking-tight mb-2">
+                Trip Details
+              </h2>
+              <p className="text-gray-500 text-sm font-medium uppercase tracking-widest">
+                Let's get the basics down
+              </p>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Available Balance</span>
+              <span className="text-xl font-black text-black leading-none">{userData?.credits ?? 0}</span>
+            </div>
           </div>
 
           {error && (
