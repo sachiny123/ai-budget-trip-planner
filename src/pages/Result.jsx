@@ -44,10 +44,9 @@ export default function Result() {
       await new Promise(r => setTimeout(r, 500));
 
       const canvas = await html2canvas(element, {
-        scale: 1.5, // Reduced from 2 for better stability
+        scale: 1, // Further reduced for stability
         useCORS: true,
-        logging: true, // Enable html2canvas internal logs
-        allowTaint: true,
+        logging: true,
         backgroundColor: "#ffffff",
       });
 
@@ -81,6 +80,7 @@ export default function Result() {
           <img
             src={`https://loremflickr.com/1920/1080/${destination},landscape/all`}
             alt={destination}
+            crossOrigin="anonymous"
             className="absolute inset-0 w-full h-full object-cover grayscale" // Grayscale for B/W theme
           />
           <div className="absolute inset-0 bg-black/60" />
