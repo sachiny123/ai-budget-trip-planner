@@ -146,7 +146,7 @@ export default function Result() {
         <button
           id="download-btn"
           onClick={handleDownloadPDF}
-          className="px-8 py-4 bg-white text-black border-2 border-black font-bold rounded-full hover:bg-black hover:text-white transition-all text-xs tracking-widest uppercase"
+          className="px-8 py-4 bg-white text-white border-2 border-black font-bold rounded-full hover:bg-black hover:text-white transition-all text-xs tracking-widest uppercase"
         >
           Download PDF
         </button>
