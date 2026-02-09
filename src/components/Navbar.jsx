@@ -27,6 +27,9 @@ export default function Navbar() {
                             <div className="hidden md:flex items-center space-x-6 text-xs font-bold uppercase tracking-widest text-black/60">
                                 <Link to="/plan" className="hover:text-black transition-colors">Plan</Link>
                                 <Link to="/dashboard" className="hover:text-black transition-colors">My Trips</Link>
+                                {(currentUser.email === import.meta.env.VITE_ADMIN_EMAIL || currentUser.email === "admin@tripwise.com") && (
+                                    <Link to="/admin" className="hover:text-black transition-colors underline decoration-2 underline-offset-4">Admin</Link>
+                                )}
                                 <Link to="/pricing" className="hover:text-black transition-colors">Refill</Link>
                             </div>
 
