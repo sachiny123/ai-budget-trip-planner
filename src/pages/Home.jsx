@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const images = [
   {
@@ -26,42 +27,6 @@ const images = [
 
 export default function Home() {
   const [current, setCurrent] = useState(0);
-  const word = "India";
-const [typedText, setTypedText] = useState("");
-const [isDeleting, setIsDeleting] = useState(false);
-const [index, setIndex] = useState(0);
-
-useEffect(() => {
-  let timeout;
-
-  if (!isDeleting && index < word.length) {
-    // Typing
-    timeout = setTimeout(() => {
-      setTypedText(word.slice(0, index + 1));
-      setIndex(index + 1);
-    }, 150);
-  } 
-  else if (!isDeleting && index === word.length) {
-    // Pause after full word
-    timeout = setTimeout(() => {
-      setIsDeleting(true);
-    }, 5000); // ⏸️ 5 seconds pause
-  } 
-  else if (isDeleting && index > 0) {
-    // Deleting
-    timeout = setTimeout(() => {
-      setTypedText(word.slice(0, index - 1));
-      setIndex(index - 1);
-    }, 80);
-  } 
-  else if (isDeleting && index === 0) {
-    // Restart typing
-    setIsDeleting(false);
-  }
-
-  return () => clearTimeout(timeout);
-}, [index, isDeleting]);
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,153 +36,204 @@ useEffect(() => {
   }, []);
 
   return (
-    <div className="w-screen overflow-x-hidden bg-black">
+    <div className="w-full min-h-screen bg-white text-black font-sans overflow-x-hidden">
+      {/* ================= NAV ================= */}
+      <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-6 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <h1 className="text-2xl font-black tracking-tighter uppercase">
+          TripWise<span className="text-gray-400">.AI</span>
+        </h1>
+
+        <Link
+          to="/plan"
+          className="px-6 py-2 rounded-full bg-black text-white font-bold text-sm uppercase tracking-wider hover:bg-gray-800 transition"
+        >
+          Start Planning
+        </Link>
+      </nav>
+
       {/* ================= HERO ================= */}
-      <section className="relative w-screen h-screen overflow-hidden">
-        {/* Background */}
-        <img
-          src={images[current].src}
-          alt={images[current].title}
-          className="absolute inset-0 w-full h-full object-cover scale-105 animate-zoom"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+      <header className="relative w-full min-h-screen pt-32 pb-20 px-6 md:px-12 flex flex-col justify-center">
 
-        {/* Nav */}
-        <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-10 py-6 z-20">
-          <h1 className="text-2xl font-bold text-white">
-            Trip<span className="text-indigo-400">Wise</span>
-          </h1>
+        <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center">
 
-          {/* CTA text BLACK */}
-          <Link
-            to="/plan"
-            className="px-6 py-2 rounded-full bg-white text-black font-semibold hover:bg-gray-200 transition"
+          {/* Text Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8 z-10"
           >
-            Plan Trip
-          </Link>
-        </nav>
+            <div className="inline-block px-3 py-1 border border-black rounded-full text-xs font-bold uppercase tracking-widest">
+              AI-Powered Travel Planner
+            </div>
 
-        {/* Hero content */}
-        <div className="relative z-10 h-full flex items-center px-10 md:px-24">
-          <div className="max-w-2xl text-white animate-fade-slide">
-            <p className="uppercase tracking-widest text-sm text-indigo-300 mb-4">
-              AI Trip Planner for India
-            </p>
-
-            <h2 className="text-5xl md:text-6xl font-extrabold leading-tight">
-              Discover{" "}
-              <span className="text-indigo-400">
-                {typedText}
-                <span className="animate-blink">|</span>
-              </span>
-              <br />
-              <span className="text-white/90">
-                without breaking your budget
+            <h2 className="text-6xl md:text-8xl font-black leading-tight tracking-tighter">
+              DISCOVER <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-gray-500">
+                INDIA.
               </span>
             </h2>
 
-            <p className="mt-6 text-lg text-gray-200">
-              Personalized itineraries, real cost breakdowns, and instant
-              planning powered by AI.
+            <p className="text-xl text-gray-600 max-w-md leading-relaxed">
+              Experience the future of travel. Smart itineraries, real-time budgeting, and hidden gems—all curated by AI in seconds.
             </p>
 
-            <div className="mt-10 flex gap-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Link
                 to="/plan"
-                className="px-8 py-4 rounded-xl bg-white text-black text-lg font-semibold shadow-xl hover:scale-105 transition"
+                className="px-8 py-4 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 transition-transform uppercase tracking-wide"
               >
-                Plan My Trip →
+                Plan My Trip
+              </Link>
+              <Link
+                to="/login"
+                className="px-8 py-4 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 transition-colors uppercase tracking-wide"
+              >
+                Log In
               </Link>
             </div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Location selector */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {images.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`px-4 py-1 rounded-full text-sm ${
-                current === index
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white/20 text-white"
-              }`}
-            >
-              {img.title}
-            </button>
-          ))}
+          {/* Image Slider */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+            className="relative h-[600px] w-full rounded-[2rem] overflow-hidden shadow-2xl"
+          >
+            <img
+              src={images[current].src}
+              alt={images[current].title}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[4000ms] ease-linear scale-110"
+              key={current} // Key change forces re-render for animation
+            />
+            <div className="absolute inset-0 bg-black/10" />
+
+            {/* Location Tag */}
+            <div className="absolute bottom-8 left-8 bg-white/90 backdrop-blur px-6 py-3 rounded-xl border border-white/20">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Currently Dreaming of</p>
+              <p className="text-2xl font-black text-black">{images[current].title}</p>
+            </div>
+          </motion.div>
+
+        </div>
+      </header>
+
+      {/* ================= HOW IT WORKS ================= */}
+      <section className="py-24 px-6 md:px-12 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-4xl font-black uppercase tracking-tight mb-16 text-center text-black">
+            How It Works
+          </h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            <StepCard number="01" title="Tell Us Your Dream" desc="Enter your destination, budget, and travel style." />
+            <StepCard number="02" title="AI Magic Happens" desc="Our advanced algorithms craft the perfect day-wise plan." />
+            <StepCard number="03" title="Pack & Go" desc="Download your itinerary PDF and start exploring." />
+          </div>
         </div>
       </section>
 
-      {/* ================= MIDDLE BLOCK ================= */}
-      <section className="bg-white py-24 px-8">
-        <h3 className="text-4xl font-extrabold text-center text-gray-900 mb-16">
-          How TripWise Helps You
-        </h3>
+      {/* ================= FEATURES ================= */}
+      <section className="bg-black text-white py-24 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-4xl font-black uppercase tracking-tight mb-16 text-center">
+            Why TripWise?
+          </h3>
 
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
-          <Feature
-            emoji="🧠"
-            title="AI Powered Planning"
-            desc="Our AI designs a complete day-wise itinerary tailored to your destination and budget."
-          />
-          <Feature
-            emoji="💰"
-            title="Budget Control"
-            desc="Know exactly where your money goes — travel, stay, food & activities."
-          />
-          <Feature
-            emoji="⚡"
-            title="Instant Results"
-            desc="No research. No confusion. Get your trip plan in seconds."
-          />
+          <div className="grid md:grid-cols-3 gap-12">
+            <Feature
+              title="AI Intelligence"
+              desc="Forget generic lists. Get a trip plan that actually makes sense for your travel style."
+            />
+            <Feature
+              title="Smart Budgeting"
+              desc="We calculate every rupee. Flights, food, stay, and activities—all accounted for."
+            />
+            <Feature
+              title="Instant Speed"
+              desc="Ready to go in seconds. Just enter your destination and let our AI do the rest."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ================= TESTIMONIALS ================= */}
+      <section className="py-24 px-6 md:px-12 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h3 className="text-4xl font-black uppercase tracking-tight mb-16 text-black">
+            Loved by Travelers
+          </h3>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Testimonial
+              text="I planned my entire Goa trip in 2 minutes. The budget estimates were spot on!"
+              author="Rohan M."
+              location="Mumbai"
+            />
+            <Testimonial
+              text="TripWise suggested hidden cafes in Manali I would have never found on my own."
+              author="Priya S."
+              location="Delhi"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CTA ================= */}
+      <section className="py-20 bg-gray-50 text-center">
+        <div className="max-w-3xl mx-auto px-6">
+          <h2 className="text-5xl font-black mb-8 uppercase tracking-tighter">
+            Ready to Explore?
+          </h2>
+          <Link
+            to="/plan"
+            className="inline-block px-12 py-5 rounded-full bg-black text-white text-xl font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-xl"
+          >
+            Start Planning Now
+          </Link>
         </div>
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer className="bg-gray-900 text-gray-300 py-12 px-8">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-          <div>
-            <h4 className="text-xl font-bold text-white mb-2">TripWise</h4>
-            <p className="text-sm text-gray-400">
-              Smart AI-powered trip planning for budget travelers in India.
-            </p>
-          </div>
-
-          <div>
-            <h5 className="font-semibold text-white mb-3">Product</h5>
-            <ul className="space-y-2 text-sm">
-              <li>How it works</li>
-              <li>Destinations</li>
-              <li>Pricing</li>
-            </ul>
-          </div>
-
-          <div>
-            <h5 className="font-semibold text-white mb-3">Company</h5>
-            <ul className="space-y-2 text-sm">
-              <li>About</li>
-              <li>Contact</li>
-              <li>Privacy Policy</li>
-            </ul>
-          </div>
+      <footer className="bg-white text-black py-12 px-6 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="font-bold text-lg tracking-tighter">TRIPWISE.AI</p>
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} Designed with Minimalist Love.
+          </p>
         </div>
-
-        <p className="text-center text-xs text-gray-500 mt-10">
-          © {new Date().getFullYear()} TripWise. All rights reserved.
-        </p>
       </footer>
     </div>
   );
 }
 
-function Feature({ emoji, title, desc }) {
+function Feature({ title, desc }) {
   return (
-    <div className="text-center p-8 rounded-2xl shadow-lg hover:shadow-2xl transition bg-white">
-      <div className="text-4xl mb-4">{emoji}</div>
-      <h4 className="text-xl font-bold mb-2">{title}</h4>
-      <p className="text-gray-600">{desc}</p>
+    <div className="p-8 border border-white/20 rounded-3xl hover:bg-white/10 transition-colors">
+      <div className="w-12 h-1 bg-white mb-8" />
+      <h4 className="text-xl font-bold mb-4 uppercase tracking-wide">{title}</h4>
+      <p className="text-gray-400 leading-relaxed font-light">{desc}</p>
+    </div>
+  );
+}
+
+function StepCard({ number, title, desc }) {
+  return (
+    <div className="p-8 bg-white rounded-3xl border border-gray-100 hover:shadow-xl transition-shadow text-center">
+      <div className="text-6xl font-black text-gray-100 mb-4">{number}</div>
+      <h4 className="text-xl font-bold mb-2 uppercase tracking-wide">{title}</h4>
+      <p className="text-gray-500">{desc}</p>
+    </div>
+  );
+}
+
+function Testimonial({ text, author, location }) {
+  return (
+    <div className="p-8 bg-gray-50 rounded-3xl border border-gray-100 text-left">
+      <p className="text-lg font-medium text-gray-800 italic mb-6">"{text}"</p>
+      <div>
+        <p className="font-bold text-black uppercase tracking-wide">{author}</p>
+        <p className="text-xs text-gray-500">{location}</p>
+      </div>
     </div>
   );
 }
