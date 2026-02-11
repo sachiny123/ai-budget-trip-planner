@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
@@ -27,7 +27,7 @@ export default function Dashboard() {
             );
             const querySnapshot = await getDocs(q);
             const tripsData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
+                tripId: doc.id,
                 ...doc.data()
             }));
 
@@ -91,7 +91,13 @@ export default function Dashboard() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ delay: index * 0.05 }}
-                                    onClick={() => navigate("/result", { state: { ...trip } })}
+                                    onClick={() => {
+                                        if (trip.isBooked) {
+                                            navigate(`/ticket/${trip.tripId}`);
+                                        } else {
+                                            navigate("/result", { state: { ...trip } });
+                                        }
+                                    }}
                                     className="group relative bg-white border border-black/5 rounded-3xl overflow-hidden cursor-pointer hover:border-black transition-all"
                                 >
                                     <div className="aspect-[16/10] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
@@ -104,9 +110,15 @@ export default function Dashboard() {
 
                                     <div className="p-8">
                                         <div className="flex items-center justify-between mb-4">
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                {trip.duration}
-                                            </span>
+                                            {trip.isBooked ? (
+                                                <span className="px-3 py-1 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                                                    Confirmed
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                    {trip.duration}
+                                                </span>
+                                            )}
                                             <button
                                                 onClick={(e) => handleDelete(trip.id, e)}
                                                 className="text-[10px] font-bold text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
@@ -119,10 +131,26 @@ export default function Dashboard() {
                                             {trip.destination}
                                         </h2>
 
-                                        <div className="flex items-center gap-4 text-[10px] font-bold text-black/60 uppercase tracking-widest">
-                                            <span>{trip.tripType}</span>
-                                            <span>•</span>
-                                            <span>{trip.travelStyle}</span>
+                                        <div className="flex items-center justify-between mt-6">
+                                            <div className="flex items-center gap-4 text-[10px] font-bold text-black/60 uppercase tracking-widest">
+                                                <span>{trip.tripType}</span>
+                                                <span>•</span>
+                                                <span>{trip.travelStyle}</span>
+                                            </div>
+                                            {trip.isBooked && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/ticket/${trip.tripId}`);
+                                                    }}
+                                                    className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-all shadow-lg"
+                                                    title="View Tickets"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                                    </svg>
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -140,6 +168,29 @@ export default function Dashboard() {
                         </Link>
                     </div>
                 )}
+
+
+                {/* SUCCESS NOTIFICATION */}
+                <AnimatePresence>
+                    {location.state?.bookingSuccess && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed bottom-12 right-12 bg-black text-white p-8 rounded-3xl shadow-2xl z-50 flex items-center gap-6 border border-white/10"
+                        >
+                            <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="font-black uppercase tracking-tighter text-xl">Booking Confirmed!</h4>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">A confirmation email has been sent.</p>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

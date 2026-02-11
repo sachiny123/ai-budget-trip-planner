@@ -1,32 +1,33 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { db } from "../firebase";
 import { doc, updateDoc, increment } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import PaymentModal from "../components/PaymentModal";
 
 export default function Pricing() {
     const { currentUser, userData } = useAuth();
-    const [loading, setLoading] = useState(null);
+    const [selectedTier, setSelectedTier] = useState(null);
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
-    const handlePurchase = async (amount, priceId) => {
-        if (!currentUser) return alert("Please login first");
+    const handlePurchaseSuccess = async () => {
+        if (!selectedTier || !currentUser) return;
 
         try {
-            setLoading(priceId);
-            // Simulate Payment Delay
-            await new Promise(r => setTimeout(r, 1500));
-
             const userRef = doc(db, "users", currentUser.uid);
             await updateDoc(userRef, {
-                credits: increment(amount)
+                credits: increment(selectedTier.credits)
             });
-
-            alert(`Success! ${amount} Credits added to your account.`);
         } catch (err) {
             console.error("Purchase failed:", err);
-        } finally {
-            setLoading(null);
+            alert("Payment recorded but sync failed!");
         }
+    };
+
+    const handleTierSelect = (tier) => {
+        if (!currentUser) return alert("Please login first");
+        setSelectedTier(tier);
+        setIsPaymentOpen(true);
     };
 
     const tiers = [
@@ -64,6 +65,9 @@ export default function Pricing() {
                         Monetization
                     </span>
                     <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-6">Refill Credits</h1>
+                    <div className="bg-orange-50 text-orange-600 px-4 py-2 rounded-full inline-block text-[10px] font-black uppercase tracking-widest border border-orange-100 mb-8">
+                        ⚠️ Simulated Store: No real payments or charges apply
+                    </div>
                     <p className="text-gray-500 font-medium uppercase tracking-widest text-xs">
                         Current Balance: <span className="text-black">{userData?.credits ?? 0} Coins</span>
                     </p>
@@ -92,16 +96,22 @@ export default function Pricing() {
                             </div>
 
                             <button
-                                onClick={() => handlePurchase(tier.credits, tier.id)}
-                                disabled={loading !== null}
-                                className={`w-full py-5 rounded-full font-bold text-xs uppercase tracking-widest transition-all ${tier.popular ? 'bg-black text-white hover:bg-gray-800' : 'bg-white text-black border-2 border-black hover:bg-black hover:text-white'
-                                    } disabled:opacity-50`}
+                                onClick={() => handleTierSelect(tier)}
+                                className="w-full py-5 bg-black text-white rounded-full font-bold text-xs uppercase tracking-widest hover:bg-gray-800 transition-all shadow-lg"
                             >
-                                {loading === tier.id ? "Processing..." : `Get ${tier.credits} Credits`}
+                                Get {tier.credits} Credits
                             </button>
                         </motion.div>
                     ))}
                 </div>
+
+                <PaymentModal
+                    isOpen={isPaymentOpen}
+                    onClose={() => setIsPaymentOpen(false)}
+                    onSuccess={handlePurchaseSuccess}
+                    amount={selectedTier?.price.replace('₹', '') || 0}
+                    mode="REFILL"
+                />
 
                 <p className="mt-24 text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
                     Simulated Payment System • No real charges apply in this demo

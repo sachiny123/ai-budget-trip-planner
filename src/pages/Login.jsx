@@ -86,7 +86,7 @@ export default function Login() {
             <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-black text-white font-bold text-xs uppercase tracking-[0.15em] hover:bg-gray-50 transition-all"
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white border-2 border-black text-black font-bold text-xs uppercase tracking-[0.15em] hover:bg-gray-50 transition-all"
             >
                 Sign in with Google
             </button>

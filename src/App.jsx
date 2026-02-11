@@ -7,6 +7,8 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import Pricing from "./pages/Pricing";
+import Checkout from "./pages/Checkout";
+import Ticket from "./pages/Ticket";
 import Navbar from "./components/Navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +63,22 @@ function AppRoutes() {
         />
         <Route path="/pricing" element={<PageWrapper><Pricing /></PageWrapper>} />
         <Route path="/result" element={<PageWrapper><Result /></PageWrapper>} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Checkout /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ticket/:bookingId"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Ticket /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );

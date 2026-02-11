@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const images = [
   {
@@ -27,6 +28,8 @@ const images = [
 
 export default function Home() {
   const [current, setCurrent] = useState(0);
+
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,23 +63,47 @@ export default function Home() {
               </span>
             </h2>
 
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-black/40">
+              <span className="w-4 h-[1px] bg-black/20"></span>
+              Simulated Experience / Prototyping Demo
+            </div>
+
             <p className="text-lg md:text-xl text-gray-600 max-w-md leading-relaxed">
               Experience the future of travel. Smart itineraries, real-time budgeting, and hidden gems—all curated by AI in seconds.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link
-                to="/plan"
-                className="w-full sm:w-auto px-10 py-5 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-wide"
-              >
-                Plan My Trip
-              </Link>
-              <Link
-                to="/login"
-                className="w-full sm:w-auto px-10 py-5 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 active:scale-95 transition-all text-center uppercase tracking-wide"
-              >
-                Log In
-              </Link>
+              {currentUser ? (
+                <>
+                  <Link
+                    to="/plan"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-wide"
+                  >
+                    Generate Trip
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 active:scale-95 transition-all text-center uppercase tracking-wide"
+                  >
+                    My Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/plan"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-black text-white text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all text-center uppercase tracking-wide"
+                  >
+                    Plan My Trip
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="w-full sm:w-auto px-10 py-5 rounded-full bg-white text-black border-2 border-black text-lg font-bold hover:bg-gray-50 active:scale-95 transition-all text-center uppercase tracking-wide"
+                  >
+                    Log In
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
 

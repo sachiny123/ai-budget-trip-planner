@@ -66,7 +66,11 @@ export default function Navbar() {
                             </div>
                         </>
                     ) : (
-                        <div className="flex items-center space-x-4">
+                        <div className="hidden md:flex items-center gap-8">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border border-gray-200 px-3 py-1 rounded-full">
+                                Simulated Platform
+                            </span>
+                            <Link to="/" className="text-xs font-bold hover:text-gray-500 uppercase tracking-widest">Home</Link>
                             <Link to="/login" className="text-xs font-bold uppercase tracking-widest text-black/60 hover:text-black">
                                 Login
                             </Link>
@@ -79,8 +83,9 @@ export default function Navbar() {
 
                 {/* MOBILE TOGGLE */}
                 <button
-                    className="md:hidden flex flex-col space-y-1.5"
-                    onClick={() => setIsMenuOpen(true)}
+                    className="md:hidden flex flex-col space-y-1.5 p-2 -mr-2 hover:bg-black/5 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    aria-label="Toggle Menu"
                 >
                     <div className="w-6 h-0.5 bg-black" />
                     <div className="w-6 h-0.5 bg-black" />

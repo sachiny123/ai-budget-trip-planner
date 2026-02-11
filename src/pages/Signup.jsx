@@ -7,7 +7,7 @@ export default function Signup() {
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
-    const { signup } = useAuth();
+    const { signup, loginWithGoogle } = useAuth();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -28,6 +28,19 @@ export default function Signup() {
             setError("Failed to create an account");
         }
 
+        setLoading(false);
+    }
+
+    async function handleGoogleLogin() {
+        try {
+            setError("");
+            setLoading(true);
+            await loginWithGoogle();
+            navigate("/plan");
+        } catch (err) {
+            console.error("Google Login Error:", err);
+            setError(err.message || "Failed to log in with Google");
+        }
         setLoading(false);
     }
 
@@ -71,6 +84,23 @@ export default function Signup() {
                     {loading ? "Processing..." : "Sign Up"}
                 </button>
             </form>
+
+            <div className="relative my-8">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
+                    <span className="px-4 bg-white text-gray-400">Or</span>
+                </div>
+            </div>
+
+            <button
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-white border border-black text-black font-bold text-xs uppercase tracking-[0.15em] hover:bg-gray-50 transition-all"
+            >
+                Join with Google
+            </button>
         </AuthLayout>
     );
 }

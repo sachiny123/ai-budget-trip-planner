@@ -15,6 +15,7 @@ export default function Planner() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    fromCity: "",
     destination: "",
     days: "",
     budget: "",
@@ -58,6 +59,7 @@ export default function Planner() {
       setLoading(true);
 
       const trip = await generateTrip(
+        formData.fromCity,
         formData.destination,
         formData.days,
         formData.budget,
@@ -160,13 +162,22 @@ export default function Planner() {
 
           <form onSubmit={handleSubmit} className="space-y-8">
 
-            <Input
-              label="Where to?"
-              name="destination"
-              placeholder="e.g. Goa, Manali, Jaipur"
-              value={formData.destination}
-              onChange={handleChange}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Input
+                label="Starting From"
+                name="fromCity"
+                placeholder="e.g. Delhi, Mumbai"
+                value={formData.fromCity}
+                onChange={handleChange}
+              />
+              <Input
+                label="Where to?"
+                name="destination"
+                placeholder="e.g. Goa, Manali, Jaipur"
+                value={formData.destination}
+                onChange={handleChange}
+              />
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Input
