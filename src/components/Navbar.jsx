@@ -20,6 +20,7 @@ export default function Navbar() {
 
     const navLinks = [
         { name: "Plan", path: "/plan" },
+        { name: "Bookings", path: "/bookings" },
         { name: "My Trips", path: "/dashboard" },
         { name: "Refill", path: "/pricing" },
     ];

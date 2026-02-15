@@ -8,7 +8,10 @@ export default function Admin() {
     const { currentUser } = useAuth();
     const [stats, setStats] = useState({
         totalUsers: 0,
+        activeUsers: 0,
         totalTrips: 0,
+        totalRevenue: 0,
+        popularDestinations: [],
         recentTrips: [],
         users: []
     });
@@ -24,6 +27,16 @@ export default function Admin() {
         }
     }, [isAdmin]);
 
+    const formatDate = (dateValue) => {
+        if (!dateValue) return "N/A";
+        // Handle Firestore Timestamp (seconds)
+        if (dateValue.seconds) {
+            return new Date(dateValue.seconds * 1000).toLocaleDateString();
+        }
+        // Handle ISO String or Date object
+        return new Date(dateValue).toLocaleDateString();
+    };
+
     const fetchAdminStats = async () => {
         try {
             setLoading(true);
@@ -36,6 +49,30 @@ export default function Admin() {
             const tripSnap = await getDocs(collection(db, "trips"));
             const tripData = tripSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+            // CALCULATE ANALYTICS
+            let revenue = 0;
+            const destCounts = {};
+            const uniqueUserIds = new Set();
+
+            tripData.forEach(trip => {
+                // Revenue (Approx based on budget)
+                const budgetVal = Number(trip.budget) || 0;
+                revenue += budgetVal;
+
+                // Popular Destinations
+                const dest = trip.destination ? trip.destination.trim() : "Unknown";
+                destCounts[dest] = (destCounts[dest] || 0) + 1;
+
+                // Active Users
+                if (trip.userId) uniqueUserIds.add(trip.userId);
+            });
+
+            // Sort Destinations
+            const sortedDestinations = Object.entries(destCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3) // Top 3
+                .map(([name, count]) => ({ name, count }));
+
             // Fetch Recent Trips
             const recentQuery = query(collection(db, "trips"), orderBy("createdAt", "desc"), limit(5));
             const recentSnap = await getDocs(recentQuery);
@@ -43,7 +80,10 @@ export default function Admin() {
 
             setStats({
                 totalUsers: userData.length,
+                activeUsers: uniqueUserIds.size,
                 totalTrips: tripData.length,
+                totalRevenue: revenue,
+                popularDestinations: sortedDestinations,
                 recentTrips: recentTrips,
                 users: userData
             });
@@ -73,14 +113,32 @@ export default function Admin() {
                 ) : (
                     <div className="space-y-12 md:space-y-16">
                         {/* STATS CARDS */}
-                        <div className="grid md:grid-cols-2 gap-6 md:gap-8 text-white">
-                            <div className="bg-black text-white p-12 rounded-[3rem] flex flex-col justify-between h-64">
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Total Creators</span>
-                                <span className="text-8xl font-black tracking-tighter">{stats.totalUsers}</span>
+                        <div className="grid md:grid-cols-4 gap-6 md:gap-8 text-white">
+                            <div className="bg-black text-white p-8 rounded-[2.5rem] flex flex-col justify-between h-56">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Total Revenue (Est)</span>
+                                <span className="text-4xl font-black tracking-tighter">₹{(stats.totalRevenue / 100000).toFixed(1)}L</span>
                             </div>
-                            <div className="bg-black text-white p-12 rounded-[3rem] flex flex-col justify-between h-64 border border-black">
-                                <span className="text-xs font-bold uppercase tracking-widest text-white/50">Itineraries Generated</span>
-                                <span className="text-8xl font-black tracking-tighter">{stats.totalTrips}</span>
+                            <div className="bg-white text-black border-2 border-black p-8 rounded-[2.5rem] flex flex-col justify-between h-56">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Total Trips</span>
+                                <span className="text-6xl font-black tracking-tighter">{stats.totalTrips}</span>
+                            </div>
+                            <div className="bg-black text-white p-8 rounded-[2.5rem] flex flex-col justify-between h-56">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">Active / Total Users</span>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-6xl font-black tracking-tighter">{stats.activeUsers}</span>
+                                    <span className="text-xl text-gray-500">/ {stats.totalUsers}</span>
+                                </div>
+                            </div>
+                            <div className="bg-gray-100 text-black p-8 rounded-[2.5rem] flex flex-col justify-between h-56">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Top Destinations</span>
+                                <div className="space-y-2">
+                                    {stats.popularDestinations.map((d, i) => (
+                                        <div key={i} className="flex justify-between text-sm font-bold uppercase">
+                                            <span>{i + 1}. {d.name}</span>
+                                            <span className="text-gray-400">{d.count}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -94,7 +152,7 @@ export default function Admin() {
                                             <th className="py-4 px-2">Destination</th>
                                             <th className="py-4 px-2">Type</th>
                                             <th className="py-4 px-2">Budget</th>
-                                            <th className="py-4 px-2">Date</th>
+                                            <th className="py-4 px-2">Created</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -104,7 +162,7 @@ export default function Admin() {
                                                 <td className="py-4 px-2 text-gray-500 uppercase">{trip.tripType}</td>
                                                 <td className="py-4 px-2 text-black font-black">₹{trip.budget}</td>
                                                 <td className="py-4 px-2 text-gray-400 text-xs">
-                                                    {new Date(trip.createdAt).toLocaleDateString()}
+                                                    {formatDate(trip.createdAt)}
                                                 </td>
                                             </tr>
                                         ))}

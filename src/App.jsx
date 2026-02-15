@@ -9,7 +9,9 @@ import Admin from "./pages/Admin";
 import Pricing from "./pages/Pricing";
 import Checkout from "./pages/Checkout";
 import Ticket from "./pages/Ticket";
+import Test from "./pages/Test";
 import Navbar from "./components/Navbar";
+import Bookings from "./pages/Bookings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,6 +56,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/bookings"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><Bookings /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin"
           element={
             <ProtectedRoute>
@@ -79,6 +89,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path="/test" element={<PageWrapper><Test /></PageWrapper>} />
       </Routes>
     </AnimatePresence>
   );

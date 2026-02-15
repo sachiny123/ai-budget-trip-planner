@@ -50,9 +50,16 @@ export default function Planner() {
       return setError("Budget seems too low for a trip.");
     }
 
+
     // CREDIT CHECK
     if (!userData || userData.credits < 1) {
       return setError("You have no credits left. Please upgrade or refill.");
+    }
+
+    // LOGIC CHECK: Impossible Budget
+    const minDailyCost = 1000; // minimal survival cost per day (change as needed)
+    if (Number(formData.budget) < (Number(formData.days) * minDailyCost)) {
+      return setError(`Budget is too low! Minimum ₹${minDailyCost}/day needed (Total: ₹${Number(formData.days) * minDailyCost}).`);
     }
 
     try {

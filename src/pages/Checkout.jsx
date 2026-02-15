@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { doc, updateDoc, arrayUnion, setDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore"; // Removed unused imports
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import PaymentModal from "../components/PaymentModal";
+import { sendBookingConfirmation } from "../services/email-service"; // NEW
 
 export default function Checkout() {
     const { state } = useLocation();
     const navigate = useNavigate();
     const { currentUser } = useAuth();
-    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false); // Manual Modal
     const [isEmailSentShow, setIsEmailSentShow] = useState(false);
+    const [isProcessingRazorpay, setIsProcessingRazorpay] = useState(false);
 
     if (!state || !state.selectedTransport || !state.selectedHotel) {
         return (
@@ -27,7 +29,82 @@ export default function Checkout() {
     const platformFee = Math.floor(totalSelection * 0.05); // 5% fee
     const grandTotal = totalSelection + platformFee;
 
-    const handleBookingSuccess = async () => {
+    // RAZORPAY LOADER
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
+    const handleInitiatePayment = async () => {
+        setIsProcessingRazorpay(true);
+
+        // CHECK IF KEY EXISTS (USE TEST KEY IF NOT)
+        const key = import.meta.env.VITE_RAZORPAY_KEY_ID;
+        const isDummyKey = !key || key.includes("YOUR_RAZORPAY_KEY") || key === "rzp_test_1234567890abcdef";
+
+        if (isDummyKey) {
+            // GRACEFUL FALLBACK FOR DEMO/DEV
+            // setTimeout to fake an attempt
+            setTimeout(() => {
+                alert("Demo Mode: No valid Razorpay Key found in .env. Switching to Manual Test Gateway.");
+                setIsProcessingRazorpay(false);
+                setIsPaymentOpen(true);
+            }, 800);
+            return;
+        }
+
+        const res = await loadRazorpay();
+
+        if (!res) {
+            alert("Razorpay SDK failed to load. Using Manual Gateway.");
+            setIsProcessingRazorpay(false);
+            setIsPaymentOpen(true);
+            return;
+        }
+
+        const options = {
+            key: key,
+            amount: grandTotal * 100, // Paísa
+            currency: "INR",
+            name: "TripWise Inc.",
+            description: `Trip to ${destination}`,
+            image: "https://cdn-icons-png.flaticon.com/512/9320/9320458.png", // Generic Travel Icon
+            handler: function (response) {
+                // Payment Success
+                console.log("Razorpay Success:", response);
+                handleBookingSuccess(response.razorpay_payment_id);
+            },
+            prefill: {
+                name: currentUser?.displayName || "Traveler",
+                email: currentUser?.email || "user@example.com",
+                contact: "9999999999"
+            },
+            theme: {
+                color: "#000000"
+            }
+        };
+
+        try {
+            const rzp1 = new window.Razorpay(options);
+            rzp1.on('payment.failed', function (response) {
+                console.error("Payment Failed:", response.error);
+                alert("Payment Failed: " + response.error.description);
+                setIsProcessingRazorpay(false);
+            });
+            rzp1.open();
+        } catch (err) {
+            console.warn("Razorpay Error:", err);
+            setIsProcessingRazorpay(false);
+            setIsPaymentOpen(true);
+        }
+    };
+
+    const handleBookingSuccess = async (paymentId = "MANUAL_ID") => {
         try {
             if (currentUser) {
                 const bookingId = "TW" + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -39,11 +116,12 @@ export default function Checkout() {
                     transport: selectedTransport,
                     hotel: selectedHotel,
                     totalPaid: grandTotal,
+                    paymentId: paymentId,
                     bookedAt: new Date().toISOString(),
                     status: "confirmed"
                 };
 
-                // 1. Update Trip Document in 'trips' collection
+                // 1. Update Trip Document
                 if (tripId) {
                     const tripRef = doc(db, "trips", tripId);
                     await updateDoc(tripRef, {
@@ -57,16 +135,19 @@ export default function Checkout() {
                     });
                 }
 
-                // 2. Save to user's bookings history for profile
+                // 2. Save to user's bookings
                 const userRef = doc(db, "users", currentUser.uid);
                 await updateDoc(userRef, {
                     bookings: arrayUnion(bookingData)
                 });
 
-                // 3. Show Visual Email Simulation
+                // 3. Send Email
+                await sendBookingConfirmation(currentUser.email, bookingData);
+
+                // 4. Show Visual Notification
                 setIsEmailSentShow(true);
 
-                // 4. Redirect after delay
+                // 5. Redirect
                 setTimeout(() => {
                     navigate(`/ticket/${tripId}`, { state: { bookingSuccess: true, bookingId } });
                 }, 3000);
@@ -132,24 +213,26 @@ export default function Checkout() {
                         </div>
 
                         <button
-                            onClick={() => setIsPaymentOpen(true)}
-                            className="w-full py-6 bg-black text-white font-black uppercase tracking-widest rounded-2xl hover:bg-gray-800 transition-all shadow-2xl"
+                            onClick={handleInitiatePayment}
+                            disabled={isProcessingRazorpay}
+                            className="w-full py-6 bg-black text-white font-black uppercase tracking-widest rounded-2xl hover:bg-gray-800 transition-all shadow-2xl disabled:bg-gray-400"
                         >
-                            Confirm and Pay
+                            {isProcessingRazorpay ? "Initializing Gateway..." : "Secure Checkout and Pay"}
                         </button>
                     </div>
                 </div>
 
                 <p className="mt-8 text-[10px] text-gray-400 text-center uppercase tracking-widest leading-loose">
-                    By clicking pay, you agree to our terms of service. <br />
-                    Tickets and confirmation will be sent to your registered email immediately after payment.
+                    Secured by Razorpay. 100% Safe.<br />
+                    Tickets will be sent to {currentUser?.email}.
                 </p>
             </div>
 
+            {/* MANUAL FALLBACK MODAL */}
             <PaymentModal
                 isOpen={isPaymentOpen}
                 onClose={() => setIsPaymentOpen(false)}
-                onSuccess={handleBookingSuccess}
+                onSuccess={() => handleBookingSuccess("MANUAL_SIM_ID")}
                 amount={grandTotal}
                 mode="BOOKING"
             />
@@ -170,11 +253,11 @@ export default function Checkout() {
                             <div className="flex-1">
                                 <h4 className="text-sm font-black uppercase tracking-widest leading-none mb-1">Confirmation Sent!</h4>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                    A simulated booking email has been sent to your inbox.
+                                    Ticket emailed to {currentUser?.email}.
                                 </p>
                             </div>
                             <div className="flex flex-col items-end">
-                                <span className="text-[8px] font-bold text-gray-300 uppercase">Now</span>
+                                <span className="text-[8px] font-bold text-gray-300 uppercase">Just Now</span>
                             </div>
                         </div>
                     </motion.div>
