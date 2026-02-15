@@ -10,9 +10,20 @@ import Razorpay from 'razorpay';
 
 dotenv.config();
 
+import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js";
+import tripRoutes from "./routes/tripRoutes.js";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Connect to Database
+connectDB();
+
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/trips", tripRoutes);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

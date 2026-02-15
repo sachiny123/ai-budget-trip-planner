@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateTrip } from "../services/ai-service";
-import { db } from "../firebase";
-import {
-  doc,
-  updateDoc,
-  increment,
-  collection,
-  addDoc
-} from "firebase/firestore";
+import { api } from "../services/api-service";
 import { useAuth } from "../context/AuthContext";
 
 export default function Planner() {
@@ -81,27 +74,26 @@ export default function Planner() {
       }
 
       // 1. Deduct Credit
-      const userRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userRef, {
-        credits: increment(-1)
-      });
+      await api.updateCredits(currentUser.uid, -1);
 
-      // 2. Save Trip to Firestore
-      const tripRef = await addDoc(collection(db, "trips"), {
+      // 2. Save Trip to MongoDB
+      const newTripData = {
         userId: currentUser.uid,
         ...trip,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(), // API adds this too but good for local state if needed
         tripType: formData.tripType,
         travelStyle: formData.travelStyle,
         budget: formData.budget,
         days: formData.days
-      });
+      };
+
+      const result = await api.createTrip(newTripData);
 
       navigate("/result", {
         state: {
           ...formData, // pass input data
           ...trip, // pass generated trip data (overwrites defaults)
-          tripId: tripRef.id
+          tripId: result.tripId
         },
       });
     } catch (err) {

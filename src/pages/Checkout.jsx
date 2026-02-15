@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { doc, updateDoc, arrayUnion } from "firebase/firestore"; // Removed unused imports
-import { db } from "../firebase";
+import { motion, AnimatePresence } from "framer-motion";
+import { api } from "../services/api-service"; // Removed unused imports
 import { useAuth } from "../context/AuthContext";
 import PaymentModal from "../components/PaymentModal";
 import { sendBookingConfirmation } from "../services/email-service"; // NEW
@@ -121,25 +121,21 @@ export default function Checkout() {
                     status: "confirmed"
                 };
 
-                // 1. Update Trip Document
+                // 1. Confirm Booking via API
                 if (tripId) {
-                    const tripRef = doc(db, "trips", tripId);
-                    await updateDoc(tripRef, {
-                        isBooked: true,
+                    await api.confirmBooking(tripId, {
+                        userId: currentUser.uid,
                         bookingId: bookingId,
+                        paymentId: paymentId,
                         bookedDetails: {
                             transport: selectedTransport,
                             hotel: selectedHotel,
                             totalPaid: grandTotal
-                        }
+                        },
+                        // Include full booking data for user record update implementation in backend
+                        ...bookingData
                     });
                 }
-
-                // 2. Save to user's bookings
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, {
-                    bookings: arrayUnion(bookingData)
-                });
 
                 // 3. Send Email
                 await sendBookingConfirmation(currentUser.email, bookingData);

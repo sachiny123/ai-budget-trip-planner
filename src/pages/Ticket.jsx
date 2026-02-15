@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../services/api-service";
 import { motion } from "framer-motion";
 
 export default function Ticket() {
@@ -17,11 +17,10 @@ export default function Ticket() {
     const fetchTrip = async () => {
         try {
             setLoading(true);
-            const tripRef = doc(db, "trips", bookingId);
-            const tripSnap = await getDoc(tripRef);
+            const tripData = await api.getTrip(bookingId);
 
-            if (tripSnap.exists()) {
-                setTrip({ id: tripSnap.id, ...tripSnap.data() });
+            if (tripData) {
+                setTrip({ id: tripData._id, ...tripData });
             } else {
                 console.error("No such trip!");
             }

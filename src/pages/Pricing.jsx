@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { db } from "../firebase";
-import { doc, updateDoc, increment } from "firebase/firestore";
+import { motion } from "framer-motion";
+import { api } from "../services/api-service";
 import { useAuth } from "../context/AuthContext";
 import PaymentModal from "../components/PaymentModal";
 
@@ -14,10 +14,7 @@ export default function Pricing() {
         if (!selectedTier || !currentUser) return;
 
         try {
-            const userRef = doc(db, "users", currentUser.uid);
-            await updateDoc(userRef, {
-                credits: increment(selectedTier.credits)
-            });
+            await api.updateCredits(currentUser.uid, selectedTier.credits);
         } catch (err) {
             console.error("Purchase failed:", err);
             alert("Payment recorded but sync failed!");

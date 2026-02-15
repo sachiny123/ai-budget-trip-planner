@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { db } from "../firebase";
-import { collection, query, where, getDocs, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { api } from "../services/api-service";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,27 +20,11 @@ export default function Dashboard() {
     const fetchTrips = async () => {
         try {
             setLoading(true);
-            // Simple query to avoid composite index requirement
-            const q = query(
-                collection(db, "trips"),
-                where("userId", "==", currentUser.uid)
-            );
-            const querySnapshot = await getDocs(q);
-            const tripsData = querySnapshot.docs.map(doc => ({
-                tripId: doc.id,
-                ...doc.data()
-            }));
-
-            // Sort in-memory instead of Firestore for now
-            tripsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+            const tripsData = await api.getUserTrips(currentUser.uid);
             setTrips(tripsData);
         } catch (err) {
             console.error("Error fetching trips:", err);
-            // Fallback for user if index is really the issue
-            if (err.message.includes("index")) {
-                alert("Firestore Index needed. Check console for the link to enable sorting.");
-            }
+            alert("Failed to load trips.");
         } finally {
             setLoading(false);
         }
@@ -51,8 +35,8 @@ export default function Dashboard() {
         e.stopPropagation();
         if (window.confirm("Are you sure you want to delete this trip?")) {
             try {
-                await deleteDoc(doc(db, "trips", id));
-                setTrips(trips.filter(t => t.id !== id));
+                await api.deleteTrip(id);
+                setTrips(trips.filter(t => t._id !== id));
             } catch (err) {
                 console.error("Error deleting trip:", err);
             }
@@ -86,14 +70,14 @@ export default function Dashboard() {
                         <AnimatePresence>
                             {trips.map((trip, index) => (
                                 <motion.div
-                                    key={trip.id}
+                                    key={trip._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ delay: index * 0.05 }}
                                     onClick={() => {
                                         if (trip.isBooked) {
-                                            navigate(`/ticket/${trip.tripId}`);
+                                            navigate(`/ticket/${trip._id}`);
                                         } else {
                                             navigate("/result", { state: { ...trip } });
                                         }
@@ -120,7 +104,7 @@ export default function Dashboard() {
                                                 </span>
                                             )}
                                             <button
-                                                onClick={(e) => handleDelete(trip.id, e)}
+                                                onClick={(e) => handleDelete(trip._id, e)}
                                                 className="text-[10px] font-bold text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
                                                 Delete
@@ -141,7 +125,7 @@ export default function Dashboard() {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        navigate(`/ticket/${trip.tripId}`);
+                                                        navigate(`/ticket/${trip._id}`);
                                                     }}
                                                     className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-all shadow-lg"
                                                     title="View Tickets"

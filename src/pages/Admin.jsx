@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { db } from "../firebase";
-import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
+import { api } from "../services/api-service";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -42,12 +41,10 @@ export default function Admin() {
             setLoading(true);
 
             // Fetch Users
-            const userSnap = await getDocs(collection(db, "users"));
-            const userData = userSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const userData = await api.getAllUsers();
 
             // Fetch Trips
-            const tripSnap = await getDocs(collection(db, "trips"));
-            const tripData = tripSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const tripData = await api.getAllTrips();
 
             // CALCULATE ANALYTICS
             let revenue = 0;
@@ -73,10 +70,8 @@ export default function Admin() {
                 .slice(0, 3) // Top 3
                 .map(([name, count]) => ({ name, count }));
 
-            // Fetch Recent Trips
-            const recentQuery = query(collection(db, "trips"), orderBy("createdAt", "desc"), limit(5));
-            const recentSnap = await getDocs(recentQuery);
-            const recentTrips = recentSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Recent Trips (already sorted from backend limit 100)
+            const recentTrips = tripData.slice(0, 5);
 
             setStats({
                 totalUsers: userData.length,
