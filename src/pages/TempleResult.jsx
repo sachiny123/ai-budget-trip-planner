@@ -27,22 +27,22 @@ export default function TempleResult() {
     return (
         <div className="min-h-screen bg-stone-50 text-black w-full font-sans pb-32">
             {/* HERO */}
-            <div className="relative h-[50vh] w-full overflow-hidden">
+            <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
                 <img
                     src={imageUrl || `https://loremflickr.com/1920/1080/temple,${guide.name}/all`}
                     alt={guide.name}
                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
                 />
                 <div className="absolute inset-0 bg-black/60" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                    <span className="text-orange-400 font-bold tracking-[0.3em] uppercase text-xs mb-4 border border-orange-400/50 px-4 py-1 rounded-full">{guide.location}</span>
-                    <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-6">{guide.name}</h1>
-                    <p className="text-stone-300 max-w-2xl text-lg font-light leading-relaxed">"{guide.overview}"</p>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 mt-8 md:mt-0">
+                    <span className="text-orange-400 font-bold tracking-[0.3em] uppercase text-[10px] md:text-xs mb-4 border border-orange-400/50 px-4 py-1 rounded-full">{guide.location}</span>
+                    <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4 md:mb-6">{guide.name}</h1>
+                    <p className="text-stone-300 max-w-2xl text-sm md:text-lg font-light leading-relaxed line-clamp-3 md:line-clamp-none">"{guide.overview}"</p>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 -mt-20 relative z-10">
-                <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl border border-stone-100">
+            <div className="max-w-5xl mx-auto px-4 md:px-6 -mt-16 md:-mt-20 relative z-10">
+                <div className="bg-white p-6 md:p-12 rounded-[2rem] shadow-2xl border border-stone-100">
 
                     {/* TIMINGS SECTION */}
                     <div className="mb-12">
@@ -50,10 +50,10 @@ export default function TempleResult() {
                             <span className="w-8 h-px bg-orange-400"></span>
                             Darshan & Timings
                         </h2>
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                             <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
                                 <span className="block text-orange-800/60 text-[10px] font-bold uppercase tracking-widest mb-2">Opening Hours</span>
-                                <span className="text-xl font-black text-orange-900">{guide.timings?.opening}</span>
+                                <span className="text-lg md:text-xl font-black text-orange-900">{guide.timings?.opening}</span>
                             </div>
                             <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
                                 <span className="block text-orange-800/60 text-[10px] font-bold uppercase tracking-widest mb-2">Aarti / Seva</span>
@@ -65,13 +65,13 @@ export default function TempleResult() {
                             </div>
                             <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
                                 <span className="block text-orange-800/60 text-[10px] font-bold uppercase tracking-widest mb-2">Best Time</span>
-                                <span className="text-lg font-bold text-orange-900">{guide.timings?.best_time_for_darshan}</span>
+                                <span className="text-base md:text-lg font-bold text-orange-900">{guide.timings?.best_time_for_darshan}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* INFO GRID */}
-                    <div className="grid md:grid-cols-2 gap-12 mb-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-12">
                         {/* ETIQUETTE */}
                         <div>
                             <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-stone-400 mb-6 flex items-center gap-4">
@@ -113,25 +113,25 @@ export default function TempleResult() {
                                 <div className="flex justify-between items-center border-b border-stone-100 pb-4">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Nearest Airport</span>
-                                        <span className="font-bold">{guide.travel_info?.nearest_airport}</span>
+                                        <span className="font-bold text-sm md:text-base">{guide.travel_info?.nearest_airport}</span>
                                     </div>
                                     <span className="text-2xl text-stone-200">✈️</span>
                                 </div>
                                 <div className="flex justify-between items-center border-b border-stone-100 pb-4">
                                     <div className="flex flex-col">
                                         <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Nearest Train</span>
-                                        <span className="font-bold">{guide.travel_info?.nearest_train}</span>
+                                        <span className="font-bold text-sm md:text-base">{guide.travel_info?.nearest_train}</span>
                                     </div>
                                     <span className="text-2xl text-stone-200">🚆</span>
                                 </div>
                                 <div className="flex gap-6">
                                     <div>
                                         <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Best Season</span>
-                                        <span className="font-black text-lg">{guide.travel_info?.best_season}</span>
+                                        <span className="font-black text-base md:text-lg">{guide.travel_info?.best_season}</span>
                                     </div>
                                     <div>
                                         <span className="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Avg Queue</span>
-                                        <span className="font-black text-lg text-orange-600">{guide.travel_info?.queue_time_avg}</span>
+                                        <span className="font-black text-base md:text-lg text-orange-600">{guide.travel_info?.queue_time_avg}</span>
                                     </div>
                                 </div>
                             </div>
@@ -145,7 +145,7 @@ export default function TempleResult() {
                                 <span className="w-8 h-px bg-stone-300"></span>
                                 Also Visit
                             </h2>
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {guide.nearby_places.map((place, i) => (
                                     <div key={i} className="bg-stone-50 p-6 rounded-xl border border-stone-200 hover:border-orange-200 transition-colors">
                                         <div className="flex justify-between items-start mb-2">
