@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { api } from "../services/api-service"; // Removed unused imports
 import { useAuth } from "../context/AuthContext";
 import PaymentModal from "../components/PaymentModal";

@@ -5,7 +5,7 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
-    signOut,
+
     onAuthStateChanged
 } from "firebase/auth";
 import { api } from "../services/api-service";

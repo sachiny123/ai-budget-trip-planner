@@ -22,6 +22,7 @@ export default function Navbar() {
         { name: "Plan", path: "/plan" },
         { name: "Bookings", path: "/bookings" },
         { name: "My Trips", path: "/dashboard" },
+        { name: "Temples", path: "/temples" },
         { name: "Refill", path: "/pricing" },
     ];
 
@@ -31,7 +32,7 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b border-black/5">
             <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                 <Link to="/" className="text-xl font-black uppercase tracking-tighter text-black">
                     TripWise

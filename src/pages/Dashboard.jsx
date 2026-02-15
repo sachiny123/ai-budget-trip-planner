@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import { api } from "../services/api-service";
+import { imageService } from "../services/image-service";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,7 +22,14 @@ export default function Dashboard() {
         try {
             setLoading(true);
             const tripsData = await api.getUserTrips(currentUser.uid);
-            setTrips(tripsData);
+
+            // Fetch images in parallel
+            const tripsWithImages = await Promise.all(tripsData.map(async (trip) => {
+                const img = await imageService.fetchImage(trip.destination);
+                return { ...trip, imageUrl: img };
+            }));
+
+            setTrips(tripsWithImages);
         } catch (err) {
             console.error("Error fetching trips:", err);
             alert("Failed to load trips.");
@@ -86,7 +94,7 @@ export default function Dashboard() {
                                 >
                                     <div className="aspect-[16/10] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
                                         <img
-                                            src={`https://loremflickr.com/800/500/${trip.destination},landscape/all`}
+                                            src={trip.imageUrl || `https://loremflickr.com/800/500/${trip.destination},landscape/all`}
                                             alt={trip.destination}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />

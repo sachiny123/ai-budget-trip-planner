@@ -10,20 +10,22 @@ import Razorpay from 'razorpay';
 
 dotenv.config();
 
-import { connectDB } from "./config/db.js";
-import userRoutes from "./routes/userRoutes.js";
-import tripRoutes from "./routes/tripRoutes.js";
+// import { connectDB } from "./config/db.js";
+// import userRoutes from "./routes/userRoutes.js";
+// import tripRoutes from "./routes/tripRoutes.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Connect to Database
-connectDB();
+// Connect to Database
+// connectDB(); // Removed for Firebase Reversion
 
 // Routes
-app.use("/api/users", userRoutes);
-app.use("/api/trips", tripRoutes);
+// Routes (Handled by Frontend Firefox SDK now)
+// app.use("/api/users", userRoutes);
+// app.use("/api/trips", tripRoutes);
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -109,9 +111,9 @@ app.post("/api/generate-trip", (req, res) => {
 import { generateItineraryAI } from './services/aiService.js';
 
 app.post("/api/generate-trip-ai", async (req, res) => {
-  const { destination, days, flightData, hotelData, travelStyle, aiModel } = req.body;
+  const { destination, days, flightData, hotelData, travelStyle } = req.body;
   try {
-    const aiItinerary = await generateItineraryAI(destination, days, flightData, hotelData, travelStyle, aiModel);
+    const aiItinerary = await generateItineraryAI(destination, days, flightData, hotelData, travelStyle);
     if (aiItinerary) {
       res.json({ itinerary: aiItinerary });
     } else {

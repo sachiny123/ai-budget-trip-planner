@@ -12,6 +12,8 @@ import Ticket from "./pages/Ticket";
 import Test from "./pages/Test";
 import Navbar from "./components/Navbar";
 import Bookings from "./pages/Bookings";
+import TemplePlanner from "./pages/TemplePlanner";
+import TempleResult from "./pages/TempleResult";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -90,6 +92,8 @@ function AppRoutes() {
           }
         />
         <Route path="/test" element={<PageWrapper><Test /></PageWrapper>} />
+        <Route path="/temples" element={<PageWrapper><TemplePlanner /></PageWrapper>} />
+        <Route path="/temple-result" element={<PageWrapper><TempleResult /></PageWrapper>} />
       </Routes>
     </AnimatePresence>
   );

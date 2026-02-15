@@ -127,6 +127,83 @@ export const generateTrip = async (fromCity, destination, days, budget, tripType
   return mockTrip;
 };
 
+/* ================= TEMPLE GUIDE GENERATOR ================= */
+export const generateTempleGuide = async (templeName) => {
+  if (import.meta.env.VITE_GROQ_API_KEY) {
+    try {
+      console.log("Generating Temple Guide with Llama 3 (Groq) for:", templeName);
+
+      const prompt = `
+        Create a comprehensive comprehensive visitor's guide for ${templeName}, India.
+        
+        Information Required:
+        1. Overview: Brief history and religious significance.
+        2. Timings: Opening/Closing times, Aarti timings, Darshan timings.
+        3. Etiquette: Dress code, photography rules, items allowed/banned.
+        4. Plan: Best time to visit, how to reach (nearest airport/train), expected queue time.
+        5. Nearby: 3 distinct nearby spiritual or tourist attractions.
+
+        JSON Format Requirements:
+        Strictly valid JSON. NO markdown.
+
+        JSON Format:
+        {
+          "name": "${templeName}",
+          "location": "City, State",
+          "overview": "Description...",
+          "significance": "Why it is important...",
+          "timings": {
+            "opening": "6:00 AM - 9:00 PM",
+            "aarti": ["Morning 5:00 AM", "Evening 7:00 PM"],
+            "best_time_for_darshan": "Early morning"
+          },
+          "etiquette": {
+            "dress_code": "Traditional wear recommended...",
+            "photography": "Allowed in outer complex...",
+            "prohibited_items": ["Leather", "Mobile Phones inside sanctum"]
+          },
+          "travel_info": {
+            "nearest_airport": "Airport Name (Distance)",
+            "nearest_train": "Station Name (Distance)",
+            "best_season": "Oct - Mar",
+            "queue_time_avg": "2-3 hours"
+          },
+          "nearby_places": [
+            { "name": "Place 1", "desc": "Short desc", "distance": "5 km" },
+            { "name": "Place 2", "desc": "Short desc", "distance": "12 km" }
+          ]
+        }
+      `;
+
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.5,
+        max_tokens: 2000,
+      });
+
+      const text = chatCompletion.choices[0]?.message?.content || "";
+      let guide;
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        guide = JSON.parse(jsonMatch ? jsonMatch[0] : text);
+      } catch (e) {
+        console.error("JSON Parse Error, text was:", text);
+        throw e;
+      }
+
+      guide.source = "Llama 3 (via Groq) 🕉️";
+      return guide;
+
+    } catch (error) {
+      console.error("Groq API Failed for Temple:", error);
+      // Fallback to Mock if needed (can be implemented if requested, currently just return error or null)
+      return { error: "Failed to generate guide. Please try again." };
+    }
+  }
+  return { error: "AI Service Unavailable" };
+};
+
 /* ================= VALIDATION LOGIC ================= */
 function validateTrip(trip, maxBudget, days) {
   if (!trip.transport || !trip.hotels) return { isValid: false, reason: "Missing data" };

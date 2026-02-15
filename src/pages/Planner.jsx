@@ -112,8 +112,8 @@ export default function Planner() {
         {/* LEFT INFO - Minimal & Cinematic */}
         <div className="hidden md:flex flex-col justify-between bg-black text-white p-12 relative overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2071&auto=format&fit=crop"
-            alt="India Travel"
+            src="https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=2070&auto=format&fit=crop"
+            alt="Travel World"
             className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale"
           />
 

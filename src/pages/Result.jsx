@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { searchFlights, searchHotels } from "../services/transport-service";
+import { imageService } from "../services/image-service";
 
 // City to IATA Code Mapping (Major Indian Cities + International favorites)
 const CITY_TO_IATA = {
@@ -65,7 +66,7 @@ export default function Result() {
   const [apiError, setApiError] = useState(null);
 
   // AI State
-  const [aiModel, setAiModel] = useState("gemini"); // 'gemini' or 'llama'
+  // const [aiModel, setAiModel] = useState("gemini"); // Removed
   const [itineraryData, setItineraryData] = useState(rawItinerary.length > 0 ? rawItinerary : (rawPlan || []));
   const [isRegenerating, setIsRegenerating] = useState(false);
 
@@ -139,6 +140,19 @@ export default function Result() {
     fetchLiveBookings();
   }, [destination, fromCity]);
 
+  // Image State
+  const [heroImage, setHeroImage] = useState(null);
+
+  useEffect(() => {
+    const loadHeroImage = async () => {
+      if (destination) {
+        const url = await imageService.fetchImage(destination + " tourism") || await imageService.fetchImage(destination);
+        setHeroImage(url);
+      }
+    };
+    loadHeroImage();
+  }, [destination]);
+
   // AI Regeneration Logic
   const handleRegenerateItinerary = async () => {
     setIsRegenerating(true);
@@ -151,8 +165,7 @@ export default function Result() {
           days,
           travelStyle,
           flightData: selectedTransport ? { airline: selectedTransport.details?.itineraries?.[0]?.segments?.[0]?.carrierCode || 'Airline', arrival: 'Destination' } : null,
-          hotelData: selectedHotel ? { name: selectedHotel.name } : null,
-          aiModel // 'gemini' or 'llama'
+          hotelData: selectedHotel ? { name: selectedHotel.name } : null
         })
       });
 
@@ -289,14 +302,6 @@ export default function Result() {
 
             {/* AI CONTROLS */}
             <div className="flex items-center gap-4 mt-4 md:mt-0 bg-gray-50 p-2 rounded-full border border-gray-200">
-              <select
-                value={aiModel}
-                onChange={(e) => setAiModel(e.target.value)}
-                className="bg-transparent text-xs font-bold uppercase tracking-widest outline-none px-2 cursor-pointer"
-              >
-                <option value="gemini">Gemini AI</option>
-                <option value="llama">Llama 3 (Groq)</option>
-              </select>
               <button
                 onClick={handleRegenerateItinerary}
                 disabled={isRegenerating}
