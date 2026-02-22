@@ -1,12 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CreditBadge } from "./CreditUI";
+import UpgradeModal from "./UpgradeModal";
 
 export default function Navbar() {
     const { currentUser, userData, logout } = useAuth();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [showUpgrade, setShowUpgrade] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -23,11 +24,12 @@ export default function Navbar() {
         { name: "Bookings", path: "/bookings" },
         { name: "My Trips", path: "/dashboard" },
         { name: "Temples", path: "/temples" },
-        { name: "Refill", path: "/pricing" },
+        { name: "Refill", onClick: () => setShowUpgrade(true) },
     ];
 
     // Add Admin link if user is admin
-    if (currentUser?.email === import.meta.env.VITE_ADMIN_EMAIL || currentUser?.email === "admin@tripwise.com") {
+    const ADMIN_EMAILS = [import.meta.env.VITE_ADMIN_EMAIL, "admin@tripwise.com", "sachinyadav.py23@gmail.com"];
+    if (currentUser && ADMIN_EMAILS.includes(currentUser.email)) {
         navLinks.push({ name: "Admin", path: "/admin", special: true });
     }
 
@@ -44,21 +46,28 @@ export default function Navbar() {
                         <>
                             <div className="flex items-center space-x-6 text-xs font-bold uppercase tracking-widest text-black/60">
                                 {navLinks.map((link) => (
-                                    <Link
-                                        key={link.path}
-                                        to={link.path}
-                                        className={`hover:text-black transition-colors ${link.special ? 'underline decoration-2 underline-offset-4 text-black' : ''}`}
-                                    >
-                                        {link.name}
-                                    </Link>
+                                    link.onClick ? (
+                                        <button
+                                            key={link.name}
+                                            onClick={link.onClick}
+                                            className="hover:text-black transition-colors"
+                                        >
+                                            {link.name}
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            key={link.path}
+                                            to={link.path}
+                                            className={`hover:text-black transition-colors ${link.special ? 'underline decoration-2 underline-offset-4 text-black' : ''}`}
+                                        >
+                                            {link.name}
+                                        </Link>
+                                    )
                                 ))}
                             </div>
 
                             <div className="flex items-center space-x-6 pl-6 border-l border-black/10">
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Credits</span>
-                                    <span className="text-sm font-black text-black leading-none">{userData?.credits ?? 0}</span>
-                                </div>
+                                <CreditBadge credits={userData?.credits ?? 0} />
                                 <button
                                     onClick={handleLogout}
                                     className="px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-gray-800 transition-all"
@@ -162,6 +171,7 @@ export default function Navbar() {
                     </>
                 )}
             </AnimatePresence>
+            <UpgradeModal show={showUpgrade} onClose={() => setShowUpgrade(false)} />
         </nav>
     );
 }

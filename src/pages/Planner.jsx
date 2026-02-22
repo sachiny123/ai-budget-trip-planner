@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { generateTrip } from "../services/ai-service";
 import { api } from "../services/api-service";
 import { useAuth } from "../context/AuthContext";
+import { UsageWarning } from "../components/CreditUI";
+import UpgradeModal from "../components/UpgradeModal";
 
 export default function Planner() {
   const navigate = useNavigate();
@@ -13,11 +15,13 @@ export default function Planner() {
     days: "",
     budget: "",
     tripType: "solo",
-    travelStyle: "budget", // ✅ FIXED (was missing)
+    travelStyle: "budget",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showWarning, setShowWarning] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleChange = (e) => {
     setError("");
@@ -26,7 +30,6 @@ export default function Planner() {
 
   const { currentUser, userData } = useAuth();
 
-  /* REPLACE THIS WITH: */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -43,14 +46,14 @@ export default function Planner() {
       return setError("Budget seems too low for a trip.");
     }
 
-
     // CREDIT CHECK
     if (!userData || userData.credits < 1) {
-      return setError("You have no credits left. Please upgrade or refill.");
+      setShowWarning(true);
+      return;
     }
 
     // LOGIC CHECK: Impossible Budget
-    const minDailyCost = 1000; // minimal survival cost per day (change as needed)
+    const minDailyCost = 1000;
     if (Number(formData.budget) < (Number(formData.days) * minDailyCost)) {
       return setError(`Budget is too low! Minimum ₹${minDailyCost}/day needed (Total: ₹${Number(formData.days) * minDailyCost}).`);
     }
@@ -67,20 +70,21 @@ export default function Planner() {
         formData.travelStyle
       );
 
-      // Check for India constraint failure
       if (trip.error) {
         setError(trip.error);
         return;
       }
 
-      // 1. Deduct Credit
-      await api.updateCredits(currentUser.uid, -1);
+      // 1. Deduct Credit (Atomic with Logging)
+      await api.deductCredit(currentUser.uid, "trip_generation", {
+        destination: formData.destination
+      });
 
       // 2. Save Trip to MongoDB
       const newTripData = {
         userId: currentUser.uid,
         ...trip,
-        createdAt: new Date(), // API adds this too but good for local state if needed
+        createdAt: new Date(),
         tripType: formData.tripType,
         travelStyle: formData.travelStyle,
         budget: formData.budget,
@@ -91,8 +95,8 @@ export default function Planner() {
 
       navigate("/result", {
         state: {
-          ...formData, // pass input data
-          ...trip, // pass generated trip data (overwrites defaults)
+          ...formData,
+          ...trip,
           tripId: result.tripId
         },
       });
@@ -106,31 +110,25 @@ export default function Planner() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4 md:p-12">
-
       <div className="w-full max-w-6xl bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl overflow-hidden grid md:grid-cols-2">
-
-        {/* LEFT INFO - Minimal & Cinematic */}
+        {/* LEFT INFO */}
         <div className="hidden md:flex flex-col justify-between bg-black text-white p-12 relative overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=2070&auto=format&fit=crop"
             alt="Travel World"
             className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale"
           />
-
           <div className="relative z-10">
             <span className="inline-block text-xs font-bold tracking-[0.2em] uppercase border border-white/30 px-4 py-2 rounded-full mb-8">
               TripWise AI
             </span>
-
             <h1 className="text-5xl font-black leading-none tracking-tighter mb-6 uppercase">
               Design <br /> Your <br /> Journey.
             </h1>
-
             <p className="text-gray-300 text-lg font-light max-w-sm">
               Craft a personalized itinerary in seconds. No stress. Just travel.
             </p>
           </div>
-
           <div className="relative z-10 text-xs font-bold uppercase tracking-widest text-gray-500">
             © TripWise {new Date().getFullYear()}
           </div>
@@ -160,7 +158,6 @@ export default function Planner() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Input
                 label="Starting From"
@@ -236,11 +233,20 @@ export default function Planner() {
           </form>
         </div>
       </div>
+
+      <UsageWarning
+        show={showWarning}
+        onClose={() => setShowWarning(false)}
+        onUpgrade={() => {
+          setShowWarning(false);
+          setShowUpgrade(true);
+        }}
+      />
+      <UpgradeModal show={showUpgrade} onClose={() => setShowUpgrade(false)} />
     </div>
   );
 }
 
-/* INPUT COMPONENT */
 function Input({ label, ...props }) {
   return (
     <div className="space-y-2">

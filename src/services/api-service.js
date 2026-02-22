@@ -23,16 +23,22 @@ export const api = {
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
-            // Create new user with default credits
+            // [ABUSE PREVENTION] Initial state for new users
             await setDoc(userRef, {
-                ...user,
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || "Explorer",
+                photoURL: user.photoURL || "",
                 createdAt: new Date(),
-                credits: 3,
+                credits: 3,             // Starting balance
+                creditsUsed: 0,
+                freeCreditsGranted: true,
                 isPro: false,
+                emailVerified: false,   // Default to false until first sync confirms
                 lastLogin: new Date()
             });
         } else {
-            // Update existing user
+            // Update existing user with latest profile info
             await setDoc(userRef, {
                 email: user.email,
                 displayName: user.displayName,
@@ -49,12 +55,87 @@ export const api = {
         return userSnap.exists() ? userSnap.data() : null;
     },
 
-    updateCredits: async (uid, amount) => {
+    // [CREDIT LOGIC]
+    deductCredit: async (uid, actionType, metadata = {}) => {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) throw new Error("User not found");
+        const userData = userSnap.data();
+
+        if (userData.credits <= 0) throw new Error("No credits remaining");
+
+        // 1. Atomic Update
+        await updateDoc(userRef, {
+            credits: increment(-1),
+            creditsUsed: increment(1)
+        });
+
+        // 2. Audit Logging
+        await addDoc(collection(db, "creditTransactions"), {
+            userId: uid,
+            amount: -1,
+            action: actionType,
+            timestamp: new Date(),
+            metadata: {
+                ...metadata,
+                email: userData.email
+            }
+        });
+
+        return { message: "Credit deducted successfully" };
+    },
+
+    updateCredits: async (uid, amount, source = "admin") => {
         const userRef = doc(db, "users", uid);
         await updateDoc(userRef, {
             credits: increment(amount)
         });
+
+        // Log manual/admin boost
+        await addDoc(collection(db, "creditTransactions"), {
+            userId: uid,
+            amount: amount,
+            action: "admin_grant",
+            source: source,
+            timestamp: new Date()
+        });
+
         return { message: "Credits updated" };
+    },
+
+    // [UPGRADE REQUESTS]
+    submitUpgradeRequest: async (uid, data) => {
+        const requestData = {
+            userId: uid,
+            ...data,
+            status: "pending",
+            createdAt: new Date()
+        };
+        const docRef = await addDoc(collection(db, "upgradeRequests"), requestData);
+        return { id: docRef.id, message: "Request submitted" };
+    },
+
+    getUpgradeRequests: async () => {
+        const q = query(collection(db, "upgradeRequests"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+
+    resolveUpgradeRequest: async (requestId, status, adminNote = "") => {
+        const reqRef = doc(db, "upgradeRequests", requestId);
+        await updateDoc(reqRef, {
+            status,
+            adminNote,
+            resolvedAt: new Date()
+        });
+
+        if (status === "approved") {
+            const reqSnap = await getDoc(reqRef);
+            const data = reqSnap.data();
+            // Grant credits automatically on approval
+            await api.updateCredits(data.userId, data.amountRequested || 10, "payment_approval");
+        }
     },
 
     // TRIPS

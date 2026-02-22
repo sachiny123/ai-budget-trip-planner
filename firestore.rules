@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'sachinyadav.py23@gmail.com' ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // USERS Collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Allow creation with default fields
+      allow create: if isOwner(userId) && 
+        request.resource.data.credits == 3 &&
+        request.resource.data.creditsUsed == 0;
+      
+      // Prevent direct credit modification from client, except for admin
+      allow update: if isAdmin() || (
+        isOwner(userId) && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin', 'displayName', 'photoURL'])
+      );
+    }
+    
+    // TRIPS Collection
+    match /trips/{tripId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // CREDIT TRANSACTIONS (Audit Log)
+    match /creditTransactions/{txId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if false; // Only via backend/admin (or restricted client logic if no backend)
+      // Since we are using client-side Firestore for now, we'll allow create if it matches strict schema
+      // In a real production app, this would be a Cloud Function.
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+    
+    // UPGRADE REQUESTS
+    match /upgradeRequests/{requestId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin(); // Only admin can approve/reject
+    }
+
+    // BOOKINGS
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn();
+    }
+  }
+}

@@ -16,7 +16,8 @@ export default function Admin() {
         users: [],
         tripTypeBreakdown: {},
         bookings: [],
-        revenueHistory: [] // Last 7 days
+        revenueHistory: [], // Last 7 days
+        upgradeRequests: []
     });
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +48,8 @@ export default function Admin() {
             const [userData, tripData, bookingData] = await Promise.all([
                 api.getAllUsers(),
                 api.getAllTrips(),
-                api.getAllBookings()
+                api.getAllBookings(),
+                api.getUpgradeRequests()
             ]);
 
             // Revenue History (Last 7 Days)
@@ -104,7 +106,8 @@ export default function Admin() {
                 users: userData,
                 tripTypeBreakdown: typeCounts,
                 bookings: bookingData,
-                revenueHistory
+                revenueHistory,
+                upgradeRequests: upgradeRequests || []
             });
         } catch (err) {
             console.error("Admin Fetch Error:", err);
@@ -126,16 +129,13 @@ export default function Admin() {
         }
     };
 
-    const adjustCredits = async (uid, amount, e) => {
-        e.stopPropagation();
+    const resolveRequest = async (requestId, status) => {
         try {
-            await api.updateCredits(uid, amount);
-            setStats(prev => ({
-                ...prev,
-                users: prev.users.map(u => u.uid === uid ? { ...u, credits: (u.credits || 0) + amount } : u)
-            }));
+            await api.resolveUpgradeRequest(requestId, status);
+            // Refresh stats to reflect new credits
+            fetchAdminStats();
         } catch (err) {
-            console.error("Error adjusting credits:", err);
+            console.error("Error resolving request:", err);
         }
     };
 
@@ -285,7 +285,6 @@ export default function Admin() {
                                         <thead>
                                             <tr className="bg-stone-50/50 border-b border-stone-100 text-[9px] font-black uppercase tracking-widest text-stone-400">
                                                 <th className="py-6 px-10">Destination</th>
-                                                <th className="py-6 px-4">Interested Travellers</th>
                                                 <th className="py-6 px-4">Intelligence</th>
                                                 <th className="py-6 px-4 text-right pr-10">Economic Impact</th>
                                             </tr>
@@ -294,24 +293,6 @@ export default function Admin() {
                                             {groupedTripsArray.length > 0 ? groupedTripsArray.slice(0, 50).map(group => (
                                                 <tr key={group.destination} className="hover:bg-stone-50/50 transition-colors group">
                                                     <td className="py-5 px-10 font-black uppercase text-xs tracking-tight">{group.destination}</td>
-                                                    <td className="py-5 px-4">
-                                                        <div className="flex -space-x-3 overflow-hidden">
-                                                            {group.travellers.slice(0, 5).map((traveller, idx) => (
-                                                                <div
-                                                                    key={traveller.uid}
-                                                                    title={traveller.displayName || traveller.email}
-                                                                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-stone-100 flex items-center justify-center text-[8px] font-black uppercase overflow-hidden"
-                                                                >
-                                                                    {traveller.photoURL ? <img src={traveller.photoURL} alt="" className="h-full w-full object-cover" /> : (traveller.displayName?.[0] || 'U')}
-                                                                </div>
-                                                            ))}
-                                                            {group.travellers.length > 5 && (
-                                                                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-white bg-black text-white text-[8px] font-black">
-                                                                    +{group.travellers.length - 5}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </td>
                                                     <td className="py-5 px-4">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[9px] font-black uppercase bg-stone-100 px-2 py-1 rounded">
@@ -331,6 +312,59 @@ export default function Admin() {
                                 </div>
                             </div>
                         </section>
+
+                        {/* UPGRADE REQUESTS */}
+                        {stats.upgradeRequests && stats.upgradeRequests.length > 0 && (
+                            <section>
+                                <div className="flex items-center gap-3 mb-8">
+                                    <h2 className="text-2xl font-black uppercase tracking-tight">Refill Requests</h2>
+                                    <span className="bg-orange-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">
+                                        {stats.upgradeRequests.filter(r => r.status === 'pending').length} Actions Required
+                                    </span>
+                                </div>
+                                <div className="grid gap-6">
+                                    {stats.upgradeRequests.map(req => (
+                                        <div key={req.id} className={`p-8 rounded-[2.5rem] border transition-all ${req.status === 'pending' ? 'bg-orange-50 border-orange-200' : 'bg-white border-stone-100'}`}>
+                                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                                                <div className="flex gap-6 items-center">
+                                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                                        <span className="text-xl">💳</span>
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h4 className="font-black uppercase text-sm">{req.email}</h4>
+                                                            <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${req.status === 'pending' ? 'bg-orange-500 text-white' : 'bg-stone-100 text-stone-400'}`}>
+                                                                {req.status}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                                            {req.amountRequested} Credits • Ref: {req.paymentRef} • {formatDate(req.createdAt)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {req.status === 'pending' && (
+                                                    <div className="flex gap-3">
+                                                        <button
+                                                            onClick={() => resolveRequest(req.id, 'rejected')}
+                                                            className="px-6 py-3 border border-stone-200 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-white transition-all"
+                                                        >
+                                                            Ignore
+                                                        </button>
+                                                        <button
+                                                            onClick={() => resolveRequest(req.id, 'approved')}
+                                                            className="px-8 py-3 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-lg"
+                                                        >
+                                                            Approve Sync
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         {/* COMMUNITY DIRECTORY */}
                         <section>
