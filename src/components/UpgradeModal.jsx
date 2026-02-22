@@ -100,7 +100,7 @@ export default function UpgradeModal({ show, onClose }) {
                                 <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-4">1. Scan & Pay across any UPI App</p>
                                 <div className="bg-white p-4 rounded-3xl shadow-sm inline-block mb-4 border border-stone-100">
                                     <img
-                                        src="/phonepe-scanner.png"
+                                        src="/phonepe-scanner.jpeg"
                                         alt="PhonePe Scanner"
                                         className="w-48 h-48 object-contain rounded-xl mx-auto"
                                         onError={(e) => {
