@@ -1,3 +1,5 @@
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreditBadge } from "./CreditUI";

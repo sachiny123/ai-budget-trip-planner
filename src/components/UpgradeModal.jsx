@@ -98,7 +98,7 @@ export default function UpgradeModal({ show, onClose }) {
                         <div className="bg-stone-50 p-8 rounded-[2rem] border border-stone-100">
                             <div className="text-center mb-6">
                                 <p className="text-[9px] font-black uppercase tracking-widest text-stone-400 mb-2">Scan or Transfer to VPA</p>
-                                <code className="bg-white px-4 py-2 rounded-lg border border-stone-200 font-bold block">tripwise@okaxis</code>
+                                <code className="bg-white px-4 py-2 rounded-lg border border-stone-200 font-bold block">{import.meta.env.VITE_UPI_ID || "9354086722123@ybl"}</code>
                             </div>
                             <input
                                 required
