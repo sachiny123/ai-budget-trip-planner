@@ -96,18 +96,40 @@ export default function UpgradeModal({ show, onClose }) {
 
                     {method === 'upi' ? (
                         <div className="bg-stone-50 p-8 rounded-[2rem] border border-stone-100">
-                            <div className="text-center mb-6">
-                                <p className="text-[9px] font-black uppercase tracking-widest text-stone-400 mb-2">Scan or Transfer to VPA</p>
-                                <code className="bg-white px-4 py-2 rounded-lg border border-stone-200 font-bold block">{import.meta.env.VITE_UPI_ID || "9354086722123@ybl"}</code>
+                            <div className="text-center mb-8">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-4">1. Scan & Pay across any UPI App</p>
+                                <div className="bg-white p-4 rounded-3xl shadow-sm inline-block mb-4 border border-stone-100">
+                                    <img
+                                        src="/phonepe-scanner.png"
+                                        alt="PhonePe Scanner"
+                                        className="w-48 h-48 object-contain rounded-xl mx-auto"
+                                        onError={(e) => {
+                                            e.target.src = "https://placeholder.pics/svg/300/E7E7E7/8B8B8B/SCAN%20QR";
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-bold text-stone-300 uppercase tracking-widest">Or transfer to VPA</p>
+                                    <code className="bg-white px-4 py-2 rounded-lg border border-stone-200 font-bold block text-sm select-all">
+                                        {import.meta.env.VITE_UPI_ID || "9354086722123@ybl"}
+                                    </code>
+                                </div>
                             </div>
-                            <input
-                                required
-                                type="text"
-                                placeholder="Enter Transaction ID / Payment Ref"
-                                value={txnId}
-                                onChange={(e) => setTxnId(e.target.value)}
-                                className="w-full bg-white border-b-2 border-stone-200 px-4 py-4 text-center font-black uppercase text-xs focus:border-black outline-none transition-all"
-                            />
+
+                            <div className="space-y-4">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-stone-400 text-center">2. Enter 12-Digit Transaction ID (UTR)</p>
+                                <input
+                                    required
+                                    type="text"
+                                    placeholder="e.g. 4023..."
+                                    value={txnId}
+                                    onChange={(e) => setTxnId(e.target.value)}
+                                    className="w-full bg-white border-b-2 border-stone-200 px-4 py-4 text-center font-black uppercase text-xs focus:border-black outline-none transition-all"
+                                />
+                                <p className="text-[9px] font-bold text-stone-300 text-center uppercase tracking-tighter italic">
+                                    Credits will be added after admin verification
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <textarea
