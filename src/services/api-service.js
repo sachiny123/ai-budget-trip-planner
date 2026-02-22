@@ -125,6 +125,11 @@ export const api = {
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
+    getAllBookings: async () => {
+        const querySnapshot = await getDocs(collection(db, "bookings"));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
+
     // API ENDPOINTS (Flight/Hotel Search, AI) - Still via Backend
     searchFlights: async (params) => {
         const query = new URLSearchParams(params).toString();
