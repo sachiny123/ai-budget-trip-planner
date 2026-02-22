@@ -214,7 +214,11 @@ export default function Result() {
       <div ref={itineraryRef} className="bg-white pdf-capture">
         {/* HERO */}
         <div className="relative h-[40vh] w-full overflow-hidden">
-          <img src={`https://loremflickr.com/1920/1080/${destination},landscape/all`} alt={destination} className="absolute inset-0 w-full h-full object-cover grayscale" />
+          <img
+            src={heroImage || `https://loremflickr.com/1920/1080/${destination},landscape/all`}
+            alt={destination}
+            className="absolute inset-0 w-full h-full object-cover grayscale"
+          />
           <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 flex items-center justify-center text-center p-6">
             <div>

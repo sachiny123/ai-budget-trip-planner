@@ -74,16 +74,16 @@ export default function TemplePlanner() {
             <div className="w-full max-w-4xl bg-white/90 backdrop-blur-sm md:bg-white rounded-[2rem] shadow-xl overflow-hidden grid md:grid-cols-2 relative z-10">
 
                 {/* LEFT VISUAL (Desktop) */}
-                <div className="hidden md:flex flex-col justify-between bg-orange-900 text-white p-12 relative overflow-hidden">
+                <div className="hidden md:flex flex-col justify-between bg-orange-950 text-white p-12 relative overflow-hidden">
                     <AnimatePresence mode="popLayout">
                         <motion.img
                             key={currentImageIndex}
                             src={GOD_IMAGES[currentImageIndex]}
                             initial={{ opacity: 0, scale: 1.1 }}
-                            animate={{ opacity: 0.4, scale: 1 }}
+                            animate={{ opacity: 0.6, scale: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 1.5 }}
-                            className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
+                            className="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
                             alt="Divine"
                         />
                     </AnimatePresence>
