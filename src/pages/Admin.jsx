@@ -143,11 +143,31 @@ export default function Admin() {
         user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const filteredTrips = stats.recentTrips.filter(trip =>
-        trip.destination?.toLowerCase().includes(tripSearchTerm.toLowerCase()) ||
-        trip.userId?.toLowerCase().includes(tripSearchTerm.toLowerCase())
+        trip.destination?.toLowerCase().includes(tripSearchTerm.toLowerCase())
     );
+
+    const groupedTrips = filteredTrips.reduce((acc, trip) => {
+        const dest = trip.destination || "Unknown";
+        if (!acc[dest]) {
+            acc[dest] = {
+                destination: dest,
+                trips: [],
+                totalBudget: 0,
+                travellers: []
+            };
+        }
+        acc[dest].trips.push(trip);
+        acc[dest].totalBudget += Number(trip.budget || 0);
+
+        const user = stats.users.find(u => u.uid === trip.userId);
+        if (user && !acc[dest].travellers.some(t => t.uid === user.uid)) {
+            acc[dest].travellers.push(user);
+        }
+        return acc;
+    }, {});
+
+    const groupedTripsArray = Object.values(groupedTrips).sort((a, b) => b.trips.length - a.trips.length);
 
     // GRAPH HELPER
     const maxRevenue = Math.max(...stats.revenueHistory.map(h => h.amount), 1);
@@ -244,11 +264,11 @@ export default function Admin() {
                         {/* MASTER TRIP FEED */}
                         <section>
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                                <h2 className="text-2xl font-black uppercase tracking-tight">Global Journey Feed</h2>
+                                <h2 className="text-2xl font-black uppercase tracking-tight">Global Journey Clusters</h2>
                                 <div className="relative w-full md:w-80">
                                     <input
                                         type="text"
-                                        placeholder="Search destinations or users..."
+                                        placeholder="Search by location..."
                                         value={tripSearchTerm}
                                         onChange={(e) => setTripSearchTerm(e.target.value)}
                                         className="w-full bg-white border border-stone-200 rounded-full px-10 py-3 text-xs font-bold focus:border-black outline-none transition-all shadow-sm"
@@ -265,27 +285,45 @@ export default function Admin() {
                                         <thead>
                                             <tr className="bg-stone-50/50 border-b border-stone-100 text-[9px] font-black uppercase tracking-widest text-stone-400">
                                                 <th className="py-6 px-10">Destination</th>
-                                                <th className="py-6 px-4">Traveller ID</th>
-                                                <th className="py-6 px-4">Configuration</th>
-                                                <th className="py-6 px-4 text-right pr-10">Budget</th>
+                                                <th className="py-6 px-4">Interested Travellers</th>
+                                                <th className="py-6 px-4">Intelligence</th>
+                                                <th className="py-6 px-4 text-right pr-10">Economic Impact</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-stone-50">
-                                            {filteredTrips.length > 0 ? filteredTrips.slice(0, 50).map(trip => (
-                                                <tr key={trip.id} className="hover:bg-stone-50/50 transition-colors group">
-                                                    <td className="py-5 px-10 font-black uppercase text-xs tracking-tight">{trip.destination}</td>
-                                                    <td className="py-5 px-4 text-[10px] font-bold text-stone-300 group-hover:text-stone-500 transition-colors">{trip.userId?.substr(0, 10)}...</td>
+                                            {groupedTripsArray.length > 0 ? groupedTripsArray.slice(0, 50).map(group => (
+                                                <tr key={group.destination} className="hover:bg-stone-50/50 transition-colors group">
+                                                    <td className="py-5 px-10 font-black uppercase text-xs tracking-tight">{group.destination}</td>
                                                     <td className="py-5 px-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[9px] font-black uppercase bg-stone-100 px-2 py-1 rounded">{trip.tripType}</span>
-                                                            <span className="text-[9px] font-black uppercase bg-black text-white px-2 py-1 rounded">{trip.travelStyle}</span>
+                                                        <div className="flex -space-x-3 overflow-hidden">
+                                                            {group.travellers.slice(0, 5).map((traveller, idx) => (
+                                                                <div
+                                                                    key={traveller.uid}
+                                                                    title={traveller.displayName || traveller.email}
+                                                                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-stone-100 flex items-center justify-center text-[8px] font-black uppercase overflow-hidden"
+                                                                >
+                                                                    {traveller.photoURL ? <img src={traveller.photoURL} alt="" className="h-full w-full object-cover" /> : (traveller.displayName?.[0] || 'U')}
+                                                                </div>
+                                                            ))}
+                                                            {group.travellers.length > 5 && (
+                                                                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-white bg-black text-white text-[8px] font-black">
+                                                                    +{group.travellers.length - 5}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
-                                                    <td className="py-5 px-10 text-right pr-10 text-xs font-black">₹{trip.budget?.toLocaleString()}</td>
+                                                    <td className="py-5 px-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[9px] font-black uppercase bg-stone-100 px-2 py-1 rounded">
+                                                                {group.trips.length} {group.trips.length === 1 ? 'Trip' : 'Trips'}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-5 px-10 text-right pr-10 text-xs font-black">₹{group.totalBudget?.toLocaleString()}</td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan="4" className="py-20 text-center text-stone-300 font-bold uppercase text-[10px] tracking-widest">No matching journeys found</td>
+                                                    <td colSpan="4" className="py-20 text-center text-stone-300 font-bold uppercase text-[10px] tracking-widest">No matching journey clusters found</td>
                                                 </tr>
                                             )}
                                         </tbody>

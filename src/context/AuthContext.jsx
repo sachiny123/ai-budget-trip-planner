@@ -5,10 +5,13 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
-
-    onAuthStateChanged
+    onAuthStateChanged,
+    sendEmailVerification,
+    setPersistence,
+    browserLocalPersistence
 } from "firebase/auth";
 import { api } from "../services/api-service";
+import { analytics, EVENTS } from "../services/analytics-service";
 
 const AuthContext = createContext();
 
@@ -19,8 +22,22 @@ export const AuthProvider = ({ children }) => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        // Ensure local persistence for production users
+        setPersistence(auth, browserLocalPersistence);
+    }, []);
+
     const signup = async (email, password) => {
         const result = await createUserWithEmailAndPassword(auth, email, password);
+        analytics.track(EVENTS.SIGNUP, { method: 'email', uid: result.user.uid });
+
+        // [PRODUCTION HARDENING] Send verification email
+        try {
+            await sendEmailVerification(result.user);
+        } catch (e) {
+            console.error("Verification email failed:", e);
+        }
+
         await api.syncUser({
             uid: result.user.uid,
             email: result.user.email,
@@ -28,12 +45,15 @@ export const AuthProvider = ({ children }) => {
         return result;
     };
 
-    const login = (email, password) => {
-        return signInWithEmailAndPassword(auth, email, password);
+    const login = async (email, password) => {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        analytics.track(EVENTS.LOGIN, { method: 'email', uid: result.user.uid });
+        return result;
     };
 
     const loginWithGoogle = async () => {
         const result = await signInWithPopup(auth, googleProvider);
+        analytics.track(EVENTS.LOGIN, { method: 'google', uid: result.user.uid });
         await api.syncUser({
             uid: result.user.uid,
             email: result.user.email,

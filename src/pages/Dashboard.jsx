@@ -70,79 +70,77 @@ export default function Dashboard() {
                 </header>
 
                 {loading ? (
-                    <div className="flex items-center justify-center py-20">
-                        <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="bg-stone-50 rounded-[2.5rem] p-8 h-[400px] animate-pulse flex flex-col justify-end">
+                                <div className="h-4 w-24 bg-stone-200 rounded-full mb-4"></div>
+                                <div className="h-8 w-48 bg-stone-200 rounded-lg mb-6"></div>
+                                <div className="h-4 w-32 bg-stone-200 rounded-full"></div>
+                            </div>
+                        ))}
                     </div>
                 ) : trips.length > 0 ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <AnimatePresence>
                             {trips.map((trip, index) => (
                                 <motion.div
-                                    key={trip._id}
+                                    key={trip.id || trip._id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ delay: index * 0.05 }}
                                     onClick={() => {
                                         if (trip.isBooked) {
-                                            navigate(`/ticket/${trip._id}`);
+                                            navigate(`/ticket/${trip.id || trip._id}`);
                                         } else {
                                             navigate("/result", { state: { ...trip } });
                                         }
                                     }}
-                                    className="group relative bg-white border border-black/5 rounded-3xl overflow-hidden cursor-pointer hover:border-black transition-all"
+                                    className="group relative bg-white border border-stone-100 rounded-[2.5rem] overflow-hidden cursor-pointer hover:border-black transition-all shadow-sm hover:shadow-xl"
                                 >
-                                    <div className="aspect-[16/10] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+                                    <div className="aspect-[16/10] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 relative">
                                         <img
                                             src={trip.imageUrl || `https://loremflickr.com/800/500/${trip.destination},landscape/all`}
                                             alt={trip.destination}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-all duration-1000"
                                         />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     </div>
 
                                     <div className="p-8">
                                         <div className="flex items-center justify-between mb-4">
                                             {trip.isBooked ? (
-                                                <span className="px-3 py-1 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-full">
-                                                    Confirmed
+                                                <span className="px-4 py-1.5 bg-orange-600 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
+                                                    Transaction Confirmed
                                                 </span>
                                             ) : (
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                                    {trip.duration}
+                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                                    {trip.duration} Plan
                                                 </span>
                                             )}
                                             <button
-                                                onClick={(e) => handleDelete(trip._id, e)}
-                                                className="text-[10px] font-bold text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={(e) => handleDelete(trip.id || trip._id, e)}
+                                                className="text-[9px] font-black text-red-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all hover:text-red-600"
                                             >
-                                                Delete
+                                                Archive
                                             </button>
                                         </div>
 
-                                        <h2 className="text-3xl font-black uppercase tracking-tight mb-2 truncate">
+                                        <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 truncate">
                                             {trip.destination}
                                         </h2>
 
                                         <div className="flex items-center justify-between mt-6">
-                                            <div className="flex items-center gap-4 text-[10px] font-bold text-black/60 uppercase tracking-widest">
+                                            <div className="flex items-center gap-4 text-[9px] font-black text-stone-300 uppercase tracking-[0.2em]">
                                                 <span>{trip.tripType}</span>
-                                                <span>•</span>
+                                                <span className="w-1 h-1 bg-stone-200 rounded-full"></span>
                                                 <span>{trip.travelStyle}</span>
                                             </div>
-                                            {trip.isBooked && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/ticket/${trip._id}`);
-                                                    }}
-                                                    className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full hover:bg-gray-800 transition-all shadow-lg"
-                                                    title="View Tickets"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                                                    </svg>
-                                                </button>
-                                            )}
+                                            <div className="w-10 h-10 flex items-center justify-center bg-stone-50 rounded-full group-hover:bg-black group-hover:text-white transition-all">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -150,14 +148,18 @@ export default function Dashboard() {
                         </AnimatePresence>
                     </div>
                 ) : (
-                    <div className="text-center py-32 border-2 border-dashed border-black/5 rounded-[3rem]">
-                        <p className="text-gray-400 font-bold uppercase tracking-widest mb-8">No trips found</p>
-                        <Link
-                            to="/plan"
-                            className="text-black font-black uppercase tracking-tighter text-3xl hover:text-gray-600 transition-colors"
-                        >
-                            Start Planning →
-                        </Link>
+                    <div className="text-center py-40 bg-stone-50 rounded-[3rem] border-2 border-dashed border-stone-200">
+                        <div className="max-w-md mx-auto">
+                            <span className="text-5xl mb-6 block">🗺️</span>
+                            <p className="text-stone-400 font-bold uppercase tracking-[0.2em] mb-4 text-xs">First Adventure Awaits</p>
+                            <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 text-stone-300">Your travel portfolio is currently empty</h2>
+                            <Link
+                                to="/plan"
+                                className="inline-block px-10 py-5 bg-black text-white text-xs font-black uppercase tracking-[0.2em] rounded-full hover:scale-105 transition-all shadow-xl"
+                            >
+                                Craft New Journey →
+                            </Link>
+                        </div>
                     </div>
                 )}
 

@@ -12,6 +12,8 @@ import Ticket from "./pages/Ticket";
 import Test from "./pages/Test";
 import Navbar from "./components/Navbar";
 import Bookings from "./pages/Bookings";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import TemplePlanner from "./pages/TemplePlanner";
 import TempleResult from "./pages/TempleResult";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -92,6 +94,8 @@ function AppRoutes() {
           }
         />
         <Route path="/test" element={<PageWrapper><Test /></PageWrapper>} />
+        <Route path="/privacy" element={<PageWrapper><Privacy /></PageWrapper>} />
+        <Route path="/terms" element={<PageWrapper><Terms /></PageWrapper>} />
         <Route path="/temples" element={<PageWrapper><TemplePlanner /></PageWrapper>} />
         <Route path="/temple-result" element={<PageWrapper><TempleResult /></PageWrapper>} />
       </Routes>
