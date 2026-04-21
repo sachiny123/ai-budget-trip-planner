@@ -34,7 +34,18 @@ export default function Login() {
             navigate("/plan");
         } catch (err) {
             console.error("Google Login Error:", err);
-            setError(err.message || "Failed to log in with Google");
+            // Handle specific Firebase errors for easier debugging
+            let msg = "Failed to log in with Google";
+            if (err.code === "auth/unauthorized-domain") {
+                msg = "Configuration Error: This domain (likely localhost) is not added to your Firebase Authorized Domains.";
+            } else if (err.code === "auth/configuration-not-found") {
+                msg = "Configuration Error: Google Login is not enabled in your Firebase Console.";
+            } else if (err.code === "auth/popup-closed-by-user") {
+                msg = "Login cancelled (popup closed).";
+            } else {
+                msg = err.message || msg;
+            }
+            setError(msg);
         }
         setLoading(false);
     }
